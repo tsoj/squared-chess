@@ -32,8 +32,6 @@ namespace BitMasks
   extern const std::array<std::array<Bitboard, 64>, 64> intAttackTable;
   extern const std::array<Bitboard, 64> knightAttackTable;
   extern const std::array<Bitboard, 64> kingAttackTable;
-  extern const std::array<Bitboard, 64> pawnWhiteAttackTable;
-  extern const std::array<Bitboard, 64> pawnBlackAttackTable;
 
   /*template<PIECE_TYPE Pt>
   int getAttackBitboard(Bitboard occupancy, BoardIndex boardIndex)

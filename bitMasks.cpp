@@ -53,8 +53,6 @@ namespace BitMasks
   std::array<std::array<Bitboard, 64>, 64> generateRankAttackTable();
   std::array<Bitboard, 64> generateKnightAttackTable();
   std::array<Bitboard, 64> generateKingAttackTable();
-  std::array<Bitboard, 64> generatePawnWhiteAttackTable();
-  std::array<Bitboard, 64> generatePawnBlackAttackTable();
 
   const std::array<std::array<Bitboard, 64>, 64> antiDiagonalAttackTable = generateAntiDiagonalAttackTable();
   const std::array<std::array<Bitboard, 64>, 64> diagonalAttackTable = generateDiagonalAttackTable();
@@ -62,8 +60,6 @@ namespace BitMasks
   const std::array<std::array<Bitboard, 64>, 64> rankAttackTable = generateRankAttackTable();
   const std::array<Bitboard, 64> knightAttackTable = generateKnightAttackTable();
   const std::array<Bitboard, 64> kingAttackTable = generateKingAttackTable();
-  const std::array<Bitboard, 64> pawnWhiteAttackTable = generatePawnWhiteAttackTable();
-  const std::array<Bitboard, 64> pawnBlackAttackTable = generatePawnBlackAttackTable();
 
   Bitboard rankToFile(Bitboard rank)
   {
@@ -465,20 +461,7 @@ namespace BitMasks
 			if ((i + 1) % 8 != 0) {
 				ret[i] |= bitAtIndex[i + 1];
 			}
-
-      std::cout << i <<std::endl;
-      printBitboard(ret[i]);
 		}
-    return ret;
-  }
-  std::array<Bitboard, 64> generatePawnWhiteAttackTable()
-  {
-    std::array<Bitboard, 64> ret;
-    return ret;
-  }
-  std::array<Bitboard, 64> generatePawnBlackAttackTable()
-  {
-    std::array<Bitboard, 64> ret;
     return ret;
   }
 }
