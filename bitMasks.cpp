@@ -233,7 +233,7 @@ namespace BitMasks
         }
         for(int i = fieldIndex - 7; i>=0; i-=7)
         {
-          if(fieldIndex%7 == 0)
+          if(fieldIndex%8 == 7)
           {
             break;
           }
@@ -248,7 +248,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForAntiDiagonal(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 18)
+        /*if(fieldIndex == 7)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -268,7 +268,7 @@ namespace BitMasks
         Bitboard occupancy = possibleRanks[possibleRanksIndex];
         for(int i = fieldIndex + 9; i<64; i+=9)
         {
-          if(fieldIndex%7 == 0)
+          if(fieldIndex%8 == 7)
           {
             break;
           }
@@ -299,7 +299,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForDiagonal(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 8)
+        /*if(fieldIndex == 47)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -362,7 +362,7 @@ namespace BitMasks
         Bitboard occupancy = possibleRanks[possibleRanksIndex];
         for(int i = fieldIndex + 1;i<64; i++)
         {
-          if(fieldIndex%7 == 0)
+          if(fieldIndex%8 == 7)
           {
             break;
           }
@@ -393,7 +393,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForRank(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 63)
+        /*if(fieldIndex == 47)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -405,11 +405,70 @@ namespace BitMasks
   std::array<Bitboard, 64> generateKnightAttackTable()
   {
     std::array<Bitboard, 64> ret;
+
+    for (int i = 0; i < 64; i++) {
+      ret[i] = 0;
+			if (i + 15 <= 63 && i % 8 != 0) {
+				ret[i] |= bitAtIndex[i + 15];
+			}
+			if (i + 17 <= 63 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + 17];
+			}
+			if (i + 6 <= 63 && i % 8 > 1) {
+				ret[i] |= bitAtIndex[i + 6];
+			}
+			if (i + 10 <= 63 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + 10];
+			}
+			if (i - 17 >= 0 && i % 8 != 0) {
+				ret[i] |= bitAtIndex[i - 17];
+			}
+			if (i - 15 >= 0 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i - 15];
+			}
+			if (i - 10 >= 0 && i % 8 > 1) {
+				ret[i] |= bitAtIndex[i - 10];
+			}
+			if (i - 6 >= 0 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i - 6];
+			}
+		}
+
     return ret;
   }
   std::array<Bitboard, 64> generateKingAttackTable()
   {
     std::array<Bitboard, 64> ret;
+    for (int i = 0; i < 64; i++) {
+			ret[i] = 0;
+			if (i + 8 <= 63) {
+				ret[i] |= bitAtIndex[i + 8];
+				if (i % 8 != 0) {
+					ret[i] |= bitAtIndex[i + 7];
+				}
+				if ((i + 1) % 8 != 0) {
+					ret[i] |= bitAtIndex[i + 9];
+				}
+			}
+			if (i - 8 >= 0) {
+				ret[i] |= bitAtIndex[i - 8];
+				if (i % 8 != 0) {
+					ret[i] |= bitAtIndex[i - 9];
+				}
+				if ((i + 1) % 8 != 0) {
+					ret[i] |= bitAtIndex[i - 7];
+				}
+			}
+			if (i % 8 != 0) {
+				ret[i] |= bitAtIndex[i - 1];
+			}
+			if ((i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + 1];
+			}
+
+      std::cout << i <<std::endl;
+      printBitboard(ret[i]);
+		}
     return ret;
   }
   std::array<Bitboard, 64> generatePawnWhiteAttackTable()

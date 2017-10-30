@@ -9,6 +9,6 @@ using namespace BitMasks;
 int main()
 {
   //printBitboard(possibleFiles[30]);
-  //printBitboard(getHashKeyForDiagonal(0, possibleFiles[30]));
+  //printBitboard(/*diagonalAttackTable[0][*/getHashKeyForDiagonal(0, possibleFiles[30]));
   return 0;
 }
