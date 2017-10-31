@@ -67,56 +67,56 @@ void printPosition(Position position)
     for(int i = 0; i<64; i++)
     {
       temp[i] = " ";
-      if(position.blackPieces & bitAtIndex[i])
+      if(position.colors[BLACK] & bitAtIndex[i])
       {
-        if(position.pawns & bitAtIndex[i])
+        if(position.pieces[PAWN] & bitAtIndex[i])
         {
           temp[i] = BLACK_PAWN_UNICODE;
         }
-        else if(position.knights & bitAtIndex[i])
+        else if(position.pieces[KNIGHT] & bitAtIndex[i])
         {
           temp[i] = BLACK_KNIGHT_UNICODE;
         }
-        else if(position.bishops & bitAtIndex[i])
+        else if(position.pieces[BISHOP] & bitAtIndex[i])
         {
           temp[i] = BLACK_BISHOP_UNICODE;
         }
-        else if(position.rooks & bitAtIndex[i])
+        else if(position.pieces[ROOK] & bitAtIndex[i])
         {
           temp[i] = BLACK_ROOK_UNICODE;
         }
-        else if(position.queens & bitAtIndex[i])
+        else if(position.pieces[QUEEN] & bitAtIndex[i])
         {
           temp[i] = BLACK_QUEEN_UNICODE;
         }
-        else if(position.kings & bitAtIndex[i])
+        else if(position.pieces[KING] & bitAtIndex[i])
         {
           temp[i] = BLACK_KING_UNICODE;
         }
       }
-      else if(position.whitePieces & bitAtIndex[i])
+      else if(position.colors[WHITE] & bitAtIndex[i])
       {
-        if(position.pawns & bitAtIndex[i])
+        if(position.pieces[PAWN] & bitAtIndex[i])
         {
           temp[i] = WHITE_PAWN_UNICODE;
         }
-        else if(position.knights & bitAtIndex[i])
+        else if(position.pieces[KNIGHT] & bitAtIndex[i])
         {
           temp[i] = WHITE_KNIGHT_UNICODE;
         }
-        else if(position.bishops & bitAtIndex[i])
+        else if(position.pieces[BISHOP] & bitAtIndex[i])
         {
           temp[i] = WHITE_BISHOP_UNICODE;
         }
-        else if(position.rooks & bitAtIndex[i])
+        else if(position.pieces[ROOK] & bitAtIndex[i])
         {
           temp[i] = WHITE_ROOK_UNICODE;
         }
-        else if(position.queens & bitAtIndex[i])
+        else if(position.pieces[QUEEN] & bitAtIndex[i])
         {
           temp[i] = WHITE_QUEEN_UNICODE;
         }
-        else if(position.kings & bitAtIndex[i])
+        else if(position.pieces[KING] & bitAtIndex[i])
         {
           temp[i] = WHITE_KING_UNICODE;
         }

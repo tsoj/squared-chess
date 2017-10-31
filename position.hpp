@@ -5,16 +5,10 @@
 class Position
 {
 public:
-  Bitboard whitePieces;
-  Bitboard blackPieces;
+  Position();
 
-  Bitboard pawns;
-  Bitboard knights;
-  Bitboard bishops;
-  Bitboard rooks;
-  Bitboard queens;
-  Bitboard kings;
-
+  Bitboard colors[2];
+  Bitboard pieces[6];
   uint32 properties;
   /*
   bits 0 - 9: halfmoves played
@@ -29,6 +23,7 @@ public:
   PIECE_TYPE lastCapturedPieceType;
 
   void setToStartposition();
+  void clearBoard();
   int getNumberHalfmovesPlayed();
   int getNumberMovesPlayed();
   bool whiteToMove();

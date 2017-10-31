@@ -12,5 +12,7 @@ int main()
   //std::cout << LOGO << std::endl;
   printBitboard(possibleRanks[11]);
   printBitboard(getAttackBitboard<QUEEN>(possibleRanks[11], 20));
+  Position p;
+  printPosition(p);
   return 0;
 }

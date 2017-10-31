@@ -36,6 +36,7 @@
 typedef unsigned long long int uint64;
 typedef uint64 Bitboard;
 enum PIECE_TYPE {KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN, NO_PIECE};
+enum COLOR_TYPE {BLACK, WHITE, NO_COLOR};
 
 #define NORTH 8
 #define SOUTH -8
