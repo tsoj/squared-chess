@@ -33,21 +33,18 @@ namespace BitMasks
   extern const std::array<Bitboard, 64> knightAttackTable;
   extern const std::array<Bitboard, 64> kingAttackTable;
 
-  /*template<PIECE_TYPE Pt>
-  int getAttackBitboard(Bitboard occupancy, BoardIndex boardIndex)
-  {
-      return Bitboard();
-  }
-
+  template<PIECE_TYPE Pt>
+  Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex);
   template<>
-  int getAttackBitboard<NO_PIECE>(Bitboard occupancy, BoardIndex boardIndex)
-  {
-      return 0;
-  }
-
+  Bitboard getAttackBitboard<PAWN>(Bitboard occupancy, int boardIndex);
   template<>
-  int getAttackBitboard<BISHOP>(Bitboard occupancy, BoardIndex boardIndex)
-  {
-      return 0;
-  }*/
+  Bitboard getAttackBitboard<KNIGHT>(Bitboard occupancy, int boardIndex);
+  template<>
+  Bitboard getAttackBitboard<BISHOP>(Bitboard occupancy, int boardIndex);
+  template<>
+  Bitboard getAttackBitboard<ROOK>(Bitboard occupancy, int boardIndex);
+  template<>
+  Bitboard getAttackBitboard<QUEEN>(Bitboard occupancy, int boardIndex);
+  template<>
+  Bitboard getAttackBitboard<KING>(Bitboard occupancy, int boardIndex);
 };

@@ -244,7 +244,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForAntiDiagonal(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 44)
+        /*if(fieldIndex == 20 && possibleRanksIndex == 11)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -428,6 +428,8 @@ namespace BitMasks
 			if (i + SOUTH_EAST + EAST >= 0 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
 				ret[i] |= bitAtIndex[i + SOUTH_EAST + EAST];
 			}
+      //std::cout << ret[i] <<std::endl;
+      //printBitboard(ret[i]);
 		}
     return ret;
   }
@@ -462,5 +464,46 @@ namespace BitMasks
 			}
 		}
     return ret;
+  }
+
+
+
+  template<PIECE_TYPE Pt>
+  Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex)
+  {
+    return Bitboard();
+  }
+  template<>
+  Bitboard getAttackBitboard<KNIGHT>(Bitboard occupancy, int boardIndex)
+  {
+    return knightAttackTable[boardIndex];
+  }
+  template<>
+  Bitboard getAttackBitboard<BISHOP>(Bitboard occupancy, int boardIndex)
+  {
+    return
+      antiDiagonalAttackTable[boardIndex][getHashKeyForAntiDiagonal(boardIndex, occupancy)] |
+      diagonalAttackTable[boardIndex][getHashKeyForDiagonal(boardIndex, occupancy)];
+  }
+  template<>
+  Bitboard getAttackBitboard<ROOK>(Bitboard occupancy, int boardIndex)
+  {
+    return
+      rankAttackTable[boardIndex][getHashKeyForRank(boardIndex, occupancy)] |
+      fileAttackTable[boardIndex][getHashKeyForFile(boardIndex, occupancy)];
+  }
+  template<>
+  Bitboard getAttackBitboard<QUEEN>(Bitboard occupancy, int boardIndex)
+  {
+    return
+      antiDiagonalAttackTable[boardIndex][getHashKeyForAntiDiagonal(boardIndex, occupancy)] |
+      diagonalAttackTable[boardIndex][getHashKeyForDiagonal(boardIndex, occupancy)] |
+      rankAttackTable[boardIndex][getHashKeyForRank(boardIndex, occupancy)] |
+      fileAttackTable[boardIndex][getHashKeyForFile(boardIndex, occupancy)];
+  }
+  template<>
+  Bitboard getAttackBitboard<KING>(Bitboard occupancy, int boardIndex)
+  {
+    return kingAttackTable[boardIndex];
   }
 }

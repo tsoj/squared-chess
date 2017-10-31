@@ -9,8 +9,8 @@
 using namespace BitMasks;
 int main()
 {
-  std::cout << LOGO << std::endl;
-  //printBitboard(possibleFiles[30]);
-  //printBitboard(/*diagonalAttackTable[0][*/getHashKeyForDiagonal(0, possibleFiles[30]));
+  //std::cout << LOGO << std::endl;
+  printBitboard(possibleRanks[11]);
+  printBitboard(getAttackBitboard<QUEEN>(possibleRanks[11], 20));
   return 0;
 }

@@ -1,6 +1,6 @@
 CC      = clang++
 CFLAGS  = -std=c++17
-LDFLAGS =
+LDFLAGS = -std=c++17
 NAME = ^2-chess
 BIN_FILE_PATH = ./bin/
 
