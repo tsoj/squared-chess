@@ -18,7 +18,8 @@ public:
   bits 21 - 24: castling allowed?
   */
 
-  short lastPieceMovedToIndex;
+  int lastPieceMovedToIndex;
+  int lastPieceMovedFromIndex;
   PIECE_TYPE lastMovedPieceType;
   PIECE_TYPE lastCapturedPieceType;
 

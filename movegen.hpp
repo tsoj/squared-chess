@@ -1,12 +1,17 @@
+#pragma once
+
+#include <vector>
+#include "position.hpp"
 #include "movegen.hpp"
 #include "bitMasks.hpp"
 #include "types.hpp"
 #include "bitOperations.hpp"
+#include <iostream>
 
 using namespace BitOperations;
 using namespace BitMasks;
 
-/*template<PIECE_TYPE Pt, COLOR_TYPE us, COLOR_TYPE enemy>
+template<PIECE_TYPE Pt, COLOR_TYPE us, COLOR_TYPE enemy>
 void generateMoves(const Position & origPosition, const Bitboard & occupancy, std::vector<Position> & newPositions)
 {
   static Bitboard pieceOccupancy;
@@ -32,8 +37,8 @@ void generateMoves(const Position & origPosition, const Bitboard & occupancy, st
           bitScanForward(toFieldIndex, quietAttackMask);
           newPosition = origPosition;
           newPosition.lastCapturedPieceType = NO_PIECE;
-          newPosition.colors[us] = (origPosition.colors[us] & ~fromFieldIndex) | bitAtIndex[toFieldIndex];
-          newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~fromFieldIndex) | bitAtIndex[toFieldIndex];
+          newPosition.colors[us] = (origPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+          newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = Pt;
           newPosition.lastPieceMovedToIndex = toFieldIndex;
           newPosition.lastPieceMovedFromIndex = fromFieldIndex;
@@ -52,12 +57,12 @@ void generateMoves(const Position & origPosition, const Bitboard & occupancy, st
             if(origPosition.pieces[i] & bitAtIndex[toFieldIndex])
             {
               newPosition.lastCapturedPieceType = PIECE_TYPE(i);
-              newPosition.colors[enemy] = origPosition.colors[enemy] & ~toFieldIndex;
-              newPosition.pieces[PIECE_TYPE(i)] = origPosition.colors[PIECE_TYPE(i)] & ~toFieldIndex;
+              newPosition.colors[enemy] = origPosition.colors[enemy] & ~bitAtIndex[toFieldIndex];
+              newPosition.pieces[PIECE_TYPE(i)] = origPosition.colors[PIECE_TYPE(i)] & ~bitAtIndex[toFieldIndex];
             }
           }
-          newPosition.colors[us] = (origPosition.colors[us] & ~fromFieldIndex) | bitAtIndex[toFieldIndex];
-          newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~fromFieldIndex) | bitAtIndex[toFieldIndex];
+          newPosition.colors[us] = (origPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+          newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = Pt;
           newPosition.lastPieceMovedToIndex = toFieldIndex;
           newPosition.lastPieceMovedFromIndex = fromFieldIndex;
@@ -69,4 +74,3 @@ void generateMoves(const Position & origPosition, const Bitboard & occupancy, st
     } while(pieceOccupancy);
   }
 }
-*/
