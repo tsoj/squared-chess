@@ -37,3 +37,12 @@ typedef unsigned long long int uint64;
 typedef uint64 Bitboard;
 typedef short BoardIndex;
 enum PIECE_TYPE {KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN, NO_PIECE};
+
+#define NORTH 8
+#define SOUTH -8
+#define EAST 1
+#define WEST -1
+#define NORTH_EAST 9
+#define NORTH_WEST 7
+#define SOUTH_WEST -9
+#define SOUTH_EAST -7

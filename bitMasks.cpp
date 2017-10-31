@@ -211,7 +211,7 @@ namespace BitMasks
       {
         Bitboard tempAttackmask = 0;
         Bitboard occupancy = possibleRanks[possibleRanksIndex];
-        for(int i = fieldIndex + 7; i<64; i+=7)
+        for(int i = fieldIndex + NORTH_WEST; i<64; i+=NORTH_WEST)
         {
           if(fieldIndex%8 == 0)
           {
@@ -227,7 +227,7 @@ namespace BitMasks
             tempAttackmask |= bitAtIndex[i];
           }
         }
-        for(int i = fieldIndex - 7; i>=0; i-=7)
+        for(int i = fieldIndex + SOUTH_EAST; i>=0; i+=SOUTH_EAST)
         {
           if(fieldIndex%8 == 7)
           {
@@ -244,7 +244,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForAntiDiagonal(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 7)
+        /*if(fieldIndex == 44)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -262,7 +262,7 @@ namespace BitMasks
       {
         Bitboard tempAttackmask = 0;
         Bitboard occupancy = possibleRanks[possibleRanksIndex];
-        for(int i = fieldIndex + 9; i<64; i+=9)
+        for(int i = fieldIndex + NORTH_EAST; i<64; i+=NORTH_EAST)
         {
           if(fieldIndex%8 == 7)
           {
@@ -278,7 +278,7 @@ namespace BitMasks
             tempAttackmask |= bitAtIndex[i];
           }
         }
-        for(int i = fieldIndex - 9; i>=0; i-=9)
+        for(int i = fieldIndex + SOUTH_WEST; i>=0; i+=SOUTH_WEST)
         {
           if(fieldIndex%8 == 0)
           {
@@ -295,7 +295,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForDiagonal(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 47)
+        /*if(fieldIndex == 44)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -313,7 +313,7 @@ namespace BitMasks
       {
         Bitboard tempAttackmask = 0;
         Bitboard occupancy = possibleFiles[possibleFilesIndex];
-        for(int i = fieldIndex + 8; i<64; i+=8)
+        for(int i = fieldIndex + NORTH; i<64; i+=NORTH)
         {
           if(occupancy & bitAtIndex[i])
           {
@@ -325,7 +325,7 @@ namespace BitMasks
             tempAttackmask |= bitAtIndex[i];
           }
         }
-        for(int i = fieldIndex - 8; i>=0; i-=8)
+        for(int i = fieldIndex + SOUTH; i>=0; i+=SOUTH)
         {
           if(occupancy & bitAtIndex[i])
           {
@@ -338,7 +338,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForFile(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 0)
+        /*if(fieldIndex == 44)
         {
           printBitboard(possibleFiles[possibleFilesIndex]);
           printBitboard(tempAttackmask);
@@ -356,7 +356,7 @@ namespace BitMasks
       {
         Bitboard tempAttackmask = 0;
         Bitboard occupancy = possibleRanks[possibleRanksIndex];
-        for(int i = fieldIndex + 1;i<64; i++)
+        for(int i = fieldIndex + EAST;i<64; i+=EAST)
         {
           if(fieldIndex%8 == 7)
           {
@@ -372,7 +372,7 @@ namespace BitMasks
             tempAttackmask |= bitAtIndex[i];
           }
         }
-        for(int i = fieldIndex - 1;i>=0; i--)
+        for(int i = fieldIndex + WEST;i>=0; i+=WEST)
         {
           if(fieldIndex%8 == 0)
           {
@@ -389,7 +389,7 @@ namespace BitMasks
           }
         }
         ret[fieldIndex][getHashKeyForRank(fieldIndex, occupancy)] = tempAttackmask;
-        /*if(fieldIndex == 47)
+        /*if(fieldIndex == 44)
         {
           printBitboard(possibleRanks[possibleRanksIndex]);
           printBitboard(tempAttackmask);
@@ -404,32 +404,31 @@ namespace BitMasks
 
     for (int i = 0; i < 64; i++) {
       ret[i] = 0;
-			if (i + 15 <= 63 && i % 8 != 0) {
-				ret[i] |= bitAtIndex[i + 15];
+			if (i + NORTH + NORTH_WEST <= 63 && i % 8 != 0) {
+				ret[i] |= bitAtIndex[i + NORTH + NORTH_WEST];
 			}
-			if (i + 17 <= 63 && (i + 1) % 8 != 0) {
-				ret[i] |= bitAtIndex[i + 17];
+			if (i + NORTH + NORTH_EAST <= 63 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + NORTH + NORTH_EAST];
 			}
-			if (i + 6 <= 63 && i % 8 > 1) {
-				ret[i] |= bitAtIndex[i + 6];
+			if (i + NORTH_WEST + WEST <= 63 && i % 8 > 1) {
+				ret[i] |= bitAtIndex[i + NORTH_WEST + WEST];
 			}
-			if (i + 10 <= 63 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
-				ret[i] |= bitAtIndex[i + 10];
+			if (i + NORTH_EAST + EAST <= 63 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + NORTH_EAST + EAST];
 			}
-			if (i - 17 >= 0 && i % 8 != 0) {
-				ret[i] |= bitAtIndex[i - 17];
+			if (i + SOUTH + SOUTH_WEST >= 0 && i % 8 != 0) {
+				ret[i] |= bitAtIndex[i + SOUTH + SOUTH_WEST];
 			}
-			if (i - 15 >= 0 && (i + 1) % 8 != 0) {
-				ret[i] |= bitAtIndex[i - 15];
+			if (i + SOUTH + SOUTH_EAST >= 0 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + SOUTH + SOUTH_EAST];
 			}
-			if (i - 10 >= 0 && i % 8 > 1) {
-				ret[i] |= bitAtIndex[i - 10];
+			if (i + SOUTH_WEST + WEST >= 0 && i % 8 > 1) {
+				ret[i] |= bitAtIndex[i + SOUTH_WEST + WEST];
 			}
-			if (i - 6 >= 0 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
-				ret[i] |= bitAtIndex[i - 6];
+			if (i + SOUTH_EAST + EAST >= 0 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + SOUTH_EAST + EAST];
 			}
 		}
-
     return ret;
   }
   std::array<Bitboard, 64> generateKingAttackTable()
@@ -437,29 +436,29 @@ namespace BitMasks
     std::array<Bitboard, 64> ret;
     for (int i = 0; i < 64; i++) {
 			ret[i] = 0;
-			if (i + 8 <= 63) {
-				ret[i] |= bitAtIndex[i + 8];
+			if (i + NORTH <= 63) {
+				ret[i] |= bitAtIndex[i + NORTH];
 				if (i % 8 != 0) {
-					ret[i] |= bitAtIndex[i + 7];
+					ret[i] |= bitAtIndex[i + NORTH_WEST];
 				}
-				if ((i + 1) % 8 != 0) {
-					ret[i] |= bitAtIndex[i + 9];
+				if ((i + EAST) % 8 != 0) {
+					ret[i] |= bitAtIndex[i + NORTH_EAST];
 				}
 			}
-			if (i - 8 >= 0) {
-				ret[i] |= bitAtIndex[i - 8];
+			if (i + SOUTH >= 0) {
+				ret[i] |= bitAtIndex[i + SOUTH];
 				if (i % 8 != 0) {
-					ret[i] |= bitAtIndex[i - 9];
+					ret[i] |= bitAtIndex[i + SOUTH_WEST];
 				}
-				if ((i + 1) % 8 != 0) {
-					ret[i] |= bitAtIndex[i - 7];
+				if ((i + EAST) % 8 != 0) {
+					ret[i] |= bitAtIndex[i + SOUTH_EAST];
 				}
 			}
 			if (i % 8 != 0) {
-				ret[i] |= bitAtIndex[i - 1];
+				ret[i] |= bitAtIndex[i WEST];
 			}
-			if ((i + 1) % 8 != 0) {
-				ret[i] |= bitAtIndex[i + 1];
+			if ((i + EAST) % 8 != 0) {
+				ret[i] |= bitAtIndex[i + EAST];
 			}
 		}
     return ret;
