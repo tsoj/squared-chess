@@ -12,11 +12,11 @@ public:
   uint32 properties;
   /*
   bits 0 - 9: halfmoves played
-  bits 10 - 17: row of enpassant
-  bit 18 - 19: side of enpassant, both zero if no enpassant move was made
   bit 20: whose move (1 for white, 0 for black to move)
   bits 21 - 24: castling allowed?
   */
+  Bitboard enPassant;
+  //if enpassant is possible, one bit will be set where a enemy pawn must capture this pawn
 
   int lastPieceMovedToIndex;
   int lastPieceMovedFromIndex;
@@ -29,4 +29,6 @@ public:
   int getNumberMovesPlayed();
   bool whiteToMove();
   bool blackToMove();
+
+  //void printAllBitboards();
 };
