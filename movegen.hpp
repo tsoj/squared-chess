@@ -6,53 +6,118 @@
 #include "bitMasks.hpp"
 #include "types.hpp"
 #include "bitOperations.hpp"
+#include "utils.hpp"
 
 using namespace BitOperations;
 using namespace BitMasks;
 
+bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position, int kingsIndex)
+{
+  static int moveDirection;
+  //PAWN
+  if(us == WHITE)
+  {
+    moveDirection = 8;
+  }
+  else
+  {
+    moveDirection = -8;
+  }
+  if(
+    (bitAtIndex[kingsIndex + moveDirection + EAST] | bitAtIndex[kingsIndex + moveDirection + WEST]) &
+    position.pieces[PAWN] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+
+  Bitboard occupancy = position.colors[WHITE] | position.colors[BLACK];
+  //KNIGHT
+  if(
+    getAttackBitboard<KNIGHT>(occupancy, kingsIndex) &
+    position.pieces[KNIGHT] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+  //BISHOP
+  if(
+    getAttackBitboard<BISHOP>(occupancy, kingsIndex) &
+    position.pieces[BISHOP] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+  //ROOK
+  if(
+    getAttackBitboard<ROOK>(occupancy, kingsIndex) &
+    position.pieces[ROOK] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+  //QUEEN
+  if(
+    getAttackBitboard<QUEEN>(occupancy, kingsIndex) &
+    position.pieces[QUEEN] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+  //KING
+  if(
+    getAttackBitboard<KING>(occupancy, kingsIndex) &
+    position.pieces[KING] & position.colors[enemy]
+  )
+  {
+    return true;
+  }
+  return false;
+}
+
 template<PIECE_TYPE Pt>
 void applyQuietMove(
   COLOR_TYPE us, COLOR_TYPE enemy,
-  const Position & origPosition,
   Position & newPosition,
   int toFieldIndex, int fromFieldIndex
 )
 
 {
   newPosition.lastCapturedPieceType = NO_PIECE;
-  newPosition.colors[us] = (origPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.pieces[Pt] = (newPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.lastMovedPieceType = Pt;
   newPosition.lastPieceMovedToIndex = toFieldIndex;
   newPosition.lastPieceMovedFromIndex = fromFieldIndex;
+  newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
 }
 template<PIECE_TYPE Pt>
 void applyCaptureMove(
   COLOR_TYPE us, COLOR_TYPE enemy,
-  const Position & origPosition,
-  Position newPosition,
+  Position & newPosition,
   int toFieldIndex, int fromFieldIndex
 )
 {
   for(int i = 0; i<6; i+=1)
   {
-    if(origPosition.pieces[i] & bitAtIndex[toFieldIndex])
+    if(newPosition.pieces[i] & bitAtIndex[toFieldIndex])
     {
       newPosition.lastCapturedPieceType = PIECE_TYPE(i);
-      newPosition.colors[enemy] = origPosition.colors[enemy] & ~bitAtIndex[toFieldIndex];
-      newPosition.pieces[PIECE_TYPE(i)] = origPosition.pieces[PIECE_TYPE(i)] & ~bitAtIndex[toFieldIndex];
+      newPosition.colors[enemy] = newPosition.colors[enemy] & ~bitAtIndex[toFieldIndex];
+      newPosition.pieces[PIECE_TYPE(i)] = newPosition.pieces[PIECE_TYPE(i)] & ~bitAtIndex[toFieldIndex];
     }
   }
-  newPosition.colors[us] = (origPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.pieces[Pt] = (origPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.pieces[Pt] = (newPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.lastMovedPieceType = Pt;
   newPosition.lastPieceMovedToIndex = toFieldIndex;
   newPosition.lastPieceMovedFromIndex = fromFieldIndex;
+  newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
+  newPosition.castling[enemy] &= ~bitAtIndex[toFieldIndex];
 }
 
 void applyCaptureEnPassantMove(
   COLOR_TYPE us, COLOR_TYPE enemy,
-  const Position & origPosition,
   Position & newPosition,
   int toFieldIndex, int fromFieldIndex,
   Bitboard enPassant,
@@ -60,10 +125,10 @@ void applyCaptureEnPassantMove(
 )
 {
   newPosition.lastCapturedPieceType = PAWN;
-  newPosition.colors[enemy] = origPosition.colors[enemy] & ~bitAtIndex[toFieldIndex - moveDirection];
-  newPosition.pieces[PAWN] = origPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex - moveDirection];
-  newPosition.colors[us] = (origPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.pieces[PAWN] = (origPosition.pieces[PAWN] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.colors[enemy] = newPosition.colors[enemy] & ~bitAtIndex[toFieldIndex - moveDirection];
+  newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex - moveDirection];
+  newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
+  newPosition.pieces[PAWN] = (newPosition.pieces[PAWN] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.lastMovedPieceType = PAWN;
   newPosition.lastPieceMovedToIndex = toFieldIndex;
   newPosition.lastPieceMovedFromIndex = fromFieldIndex;
@@ -99,7 +164,7 @@ void generateMoves(
         {
           bitScanForward(toFieldIndex, quietAttackMask);
           newPosition = origPosition;
-          applyQuietMove<Pt>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+          applyQuietMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
           newPositions.push_back(newPosition);
           quietAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(quietAttackMask);
@@ -110,7 +175,7 @@ void generateMoves(
         {
           bitScanForward(toFieldIndex, captureAttackMask);
           newPosition = origPosition;
-          applyCaptureMove<Pt>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+          applyCaptureMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
           newPositions.push_back(newPosition);
           captureAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(captureAttackMask);
@@ -120,6 +185,7 @@ void generateMoves(
   }
 }
 
+//TODO: promotion
 void generatePawnMoves(
   COLOR_TYPE us, COLOR_TYPE enemy,
   const Position & origPosition,
@@ -154,7 +220,7 @@ void generatePawnMoves(
     if(!((origPosition.colors[BLACK] | origPosition.colors[WHITE]) & bitAtIndex[toFieldIndex]))
     {
       newPosition = origPosition;
-      applyQuietMove<PAWN>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+      applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
       newPositions.push_back(newPosition);
 
       toFieldIndex += moveDirection;
@@ -165,7 +231,7 @@ void generatePawnMoves(
       {
         newPosition = origPosition;
         newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
-        applyQuietMove<PAWN>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+        applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         newPositions.push_back(newPosition);
       }
     }
@@ -177,7 +243,6 @@ void generatePawnMoves(
         newPosition = origPosition;
         applyCaptureEnPassantMove(
           us, enemy,
-          origPosition,
           newPosition,
           toFieldIndex,
           fromFieldIndex,
@@ -189,7 +254,7 @@ void generatePawnMoves(
       else
       {
         newPosition = origPosition;
-        applyCaptureMove<PAWN>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+        applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         newPositions.push_back(newPosition);
       }
     }
@@ -201,7 +266,6 @@ void generatePawnMoves(
         newPosition = origPosition;
         applyCaptureEnPassantMove(
           us, enemy,
-          origPosition,
           newPosition,
           toFieldIndex,
           fromFieldIndex,
@@ -213,10 +277,69 @@ void generatePawnMoves(
       else
       {
         newPosition = origPosition;
-        applyCaptureMove<PAWN>(us, enemy, origPosition, newPosition, toFieldIndex, fromFieldIndex);
+        applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         newPositions.push_back(newPosition);
       }
     }
     pawnOccupancy &= ~bitAtIndex[fromFieldIndex];
   } while(pawnOccupancy);
+}
+
+
+void generateCastlingMoves(
+    COLOR_TYPE us, COLOR_TYPE enemy,
+    const Position & origPosition,
+    std::vector<Position> & newPositions,
+    Bitboard occupancy
+)
+{
+  static Position newPosition;
+  //kingsside
+  if(
+    (!isKingInCheck(us, enemy, origPosition, castlingKingFrom[us]) &&
+    !isKingInCheck(us, enemy, origPosition, castlingKingKingsideTo[us]) &&
+    !isKingInCheck(us, enemy, origPosition, castlingKingsideCheckRelevant[us])) &&
+    !(occupancy & castlingKingsideOccupancyRelevant[us])
+  )
+  {
+    newPosition = origPosition;
+    newPosition.lastCapturedPieceType = NO_PIECE;
+    newPosition.colors[us] =
+      (newPosition.colors[us] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingKingsideTo[us]];
+    newPosition.pieces[KING] =
+      (newPosition.pieces[KING] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingKingsideTo[us]];
+    newPosition.colors[us] =
+      (newPosition.colors[us] & ~bitAtIndex[castlingRookKingsideFrom[us]]) | bitAtIndex[castlingRookKingsideTo[us]];
+    newPosition.pieces[ROOK] =
+      (newPosition.pieces[ROOK] & ~bitAtIndex[castlingRookKingsideFrom[us]]) | bitAtIndex[castlingRookKingsideTo[us]];
+    newPosition.lastMovedPieceType = KING;
+    newPosition.lastPieceMovedToIndex = castlingKingKingsideTo[us];
+    newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
+    newPosition.castling[us] = 0;
+    newPositions.push_back(newPosition);
+  }
+  //queenside
+  if(
+    (!isKingInCheck(us, enemy, origPosition, castlingKingFrom[us]) &&
+    !isKingInCheck(us, enemy, origPosition, castlingKingQueensideTo[us]) &&
+    !isKingInCheck(us, enemy, origPosition, castlingQueensideCheckRelevant[us])) &&
+    !(occupancy & castlingQueensideOccupancyRelevant[us])
+  )
+  {
+    newPosition = origPosition;
+    newPosition.lastCapturedPieceType = NO_PIECE;
+    newPosition.colors[us] =
+      (newPosition.colors[us] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingQueensideTo[us]];
+    newPosition.pieces[KING] =
+      (newPosition.pieces[KING] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingQueensideTo[us]];
+    newPosition.colors[us] =
+      (newPosition.colors[us] & ~bitAtIndex[castlingRookQueensideFrom[us]]) | bitAtIndex[castlingRookQueensideTo[us]];
+    newPosition.pieces[ROOK] =
+      (newPosition.pieces[ROOK] & ~bitAtIndex[castlingRookQueensideFrom[us]]) | bitAtIndex[castlingRookQueensideTo[us]];
+    newPosition.lastMovedPieceType = KING;
+    newPosition.lastPieceMovedToIndex = castlingKingQueensideTo[us];
+    newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
+    newPosition.castling[us] = 0;
+    newPositions.push_back(newPosition);
+  }
 }

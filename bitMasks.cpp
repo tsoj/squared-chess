@@ -506,4 +506,60 @@ namespace BitMasks
   {
     return kingAttackTable[boardIndex];
   }
+
+  const std::array<int, 2> castlingKingKingsideTo =
+  {
+    6,//white
+    62//black
+  };
+  const std::array<int, 2> castlingKingFrom =
+  {
+    4,//white
+    60//black
+  };
+  const std::array<int, 2> castlingKingQueensideTo =
+  {
+    2,//white
+    58//black}
+  };
+  const std::array<int, 2> castlingRookKingsideTo =
+  {
+    5,//white
+    61//black
+  };
+  const std::array<int, 2> castlingRookKingsideFrom =
+  {
+    7,//white
+    63//black
+  };
+  const std::array<int, 2> castlingRookQueensideTo =
+  {
+    3,//white
+    59//black
+  };
+  const std::array<int, 2> castlingRookQueensideFrom =
+  {
+    0,//white
+    56//black
+  };
+  const std::array<int, 2> castlingKingsideCheckRelevant =
+  {
+    5,//white
+    61//black
+  };
+  const std::array<int, 2> castlingQueensideCheckRelevant =
+  {
+    3,//white
+    59//black
+  };
+  const std::array<Bitboard, 2> castlingKingsideOccupancyRelevant =
+  {
+    bitAtIndex[5] | bitAtIndex[6],//white
+    bitAtIndex[61] | bitAtIndex[62]//black
+  };
+  const std::array<Bitboard, 2> castlingQueensideOccupancyRelevant =
+  {
+    bitAtIndex[1] | bitAtIndex[2] | bitAtIndex[3],//white
+    bitAtIndex[57] | bitAtIndex[58] | bitAtIndex[59]//black
+  };
 }

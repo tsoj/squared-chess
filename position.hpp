@@ -9,14 +9,9 @@ public:
 
   Bitboard colors[2];
   Bitboard pieces[6];
-  uint32 properties;
-  /*
-  bits 0 - 9: halfmoves played
-  bit 20: whose move (1 for white, 0 for black to move)
-  bits 21 - 24: castling allowed?
-  */
-  Bitboard enPassant;
-  //if enpassant is possible, one bit will be set where a enemy pawn must capture this pawn
+  Bitboard enPassant;//if enpassant is possible, one bit will be set where a enemy pawn must capture this pawn
+  Bitboard castling[2];//if castling is allowed then the bit at the rook index that allows castling will be set
+  int whoIsToMove; //1 for white, -1 for black to move
 
   int lastPieceMovedToIndex;
   int lastPieceMovedFromIndex;
@@ -31,4 +26,5 @@ public:
   bool blackToMove();
 
   //void printAllBitboards();
+  void printPosition();
 };

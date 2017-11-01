@@ -33,6 +33,19 @@ namespace BitMasks
   extern const std::array<Bitboard, 64> knightAttackTable;
   extern const std::array<Bitboard, 64> kingAttackTable;
 
+  extern const std::array<int, 2> castlingKingKingsideTo;
+  extern const std::array<int, 2> castlingKingFrom;
+  extern const std::array<int, 2> castlingKingQueensideTo;
+  extern const std::array<int, 2> castlingRookKingsideTo;
+  extern const std::array<int, 2> castlingRookKingsideFrom;
+  extern const std::array<int, 2> castlingRookQueensideTo;
+  extern const std::array<int, 2> castlingRookQueensideFrom;
+  extern const std::array<int, 2> castlingKingsideCheckRelevant;
+  extern const std::array<int, 2> castlingQueensideCheckRelevant;
+  extern const std::array<Bitboard, 2> castlingKingsideOccupancyRelevant;
+  extern const std::array<Bitboard, 2> castlingQueensideOccupancyRelevant;
+
+
   template<PIECE_TYPE Pt>
   Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex);
   template<>
