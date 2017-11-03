@@ -20,8 +20,15 @@ void Position::setToStartposition()
   pieces[ROOK] = 0b1000000100000000000000000000000000000000000000000000000010000001;
   pieces[QUEEN] = 0b0000100000000000000000000000000000000000000000000000000000001000;
   pieces[KING] = 0b0001000000000000000000000000000000000000000000000000000000010000;
+  enPassant = 0b0;
   castling[BLACK] = 0b1000000100000000000000000000000000000000000000000000000000000000;
   castling[WHITE] = 0b0000000000000000000000000000000000000000000000000000000010000001;
+  whoIsToMove = WHITE_TO_MOVE;
+  numberHalfmovesPlayed = 0;
+  lastPieceMovedToIndex = 0;
+  lastPieceMovedFromIndex = 0;
+  lastMovedPieceType = NO_PIECE;
+  lastCapturedPieceType = NO_PIECE;
 }
 
 void Position::clearBoard()
@@ -37,6 +44,8 @@ void Position::clearBoard()
   enPassant = 0b0;
   castling[WHITE] = 0b0;
   castling[BLACK] = 0b0;
+  whoIsToMove = WHITE_TO_MOVE;
+  numberHalfmovesPlayed = 0;
   lastPieceMovedToIndex = 0;
   lastPieceMovedFromIndex = 0;
   lastMovedPieceType = NO_PIECE;
@@ -46,17 +55,25 @@ void Position::clearBoard()
 
 int Position::getNumberHalfmovesPlayed()
 {
-  return 0;
+  return numberHalfmovesPlayed;
 }
 int Position::getNumberMovesPlayed()
 {
-  return 0;
+  return numberHalfmovesPlayed / 2;
 }
 bool Position::whiteToMove()
 {
-  return 0;
+  if(whoIsToMove == WHITE_TO_MOVE)
+  {
+    return true;
+  }
+  return false;
 }
 bool Position::blackToMove()
 {
-  return 0;
+  if(whoIsToMove == BLACK_TO_MOVE)
+  {
+    return true;
+  }
+  return false;
 }

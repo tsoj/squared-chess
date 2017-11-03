@@ -5,7 +5,7 @@ NAME = ^2-chess
 BIN_FILE_PATH = ./bin/
 
 #HPP = bitMasks.hpp
-CPP = main.cpp bitMasks.cpp utils.cpp position.cpp
+CPP = main.cpp bitMasks.cpp utils.cpp position.cpp movegen.cpp
 OBJ = $(CPP:%.cpp=%.o)
 OBJ_DEST = $(CPP:%.cpp=$(BIN_FILE_PATH)%.o)
 

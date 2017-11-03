@@ -271,11 +271,11 @@ Position setPositionFromFen(std::string fenString)
   }
   if(whoIsToMove == "w")
   {
-    position.whoIsToMove = 1;
+    position.whoIsToMove = WHITE_TO_MOVE;
   }
   else
   {
-    position.whoIsToMove = 1;
+    position.whoIsToMove = BLACK_TO_MOVE;
   }
   for(int i = 0; i<castling.size(); i++)
   {
@@ -345,6 +345,14 @@ Position setPositionFromFen(std::string fenString)
   {
     position.enPassant = bitAtIndex[row*8 + file];
   }
+  if(numberMoves != "")
+  {
+    position.numberHalfmovesPlayed = 2* stoi(numberMoves);
+    if(whoIsToMove == "b")
+    {
+      position.numberHalfmovesPlayed += 1;
+    }
+  }
   return position;
 }
 
@@ -378,6 +386,6 @@ void printPositionBitboards(Position position)
   std::cout << position.lastPieceMovedFromIndex << std::endl;
   std::cout << "last piecetype moved:" << std::endl;
   std::cout << position.lastMovedPieceType << std::endl;
-  std::cout << "last piecestype moved to index:" << std::endl;
+  std::cout << "last piecestype captured:" << std::endl;
   std::cout << position.lastCapturedPieceType << std::endl;
 }
