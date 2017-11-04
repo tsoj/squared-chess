@@ -48,3 +48,6 @@ enum COLOR_TYPE {WHITE, BLACK, NO_COLOR};
 #define NORTH_WEST 7
 #define SOUTH_WEST -9
 #define SOUTH_EAST -7
+
+typedef int PositionValue;
+#define POSITION_VALUE_INFINITY 2000000000

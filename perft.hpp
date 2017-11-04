@@ -26,19 +26,18 @@ uint64 perft(int depth, const Position & origPosition)
   uint64 nodes = 0;
   if (depth == 0)
   {
-    //printPosition(origPosition);
     return 1;
   }
   generateAllMoves(us, enemy, origPosition, newPositions);
   for (int i = 0; i < newPositions.size(); i++) {
-    if(isKingInCheck(us, enemy, newPositions[i]))
+    /*if(isKingInCheck(us, enemy, newPositions[i]))
     {
       if(depth == 1)
       {
         //nodes++;
       }
       continue;
-    }
+    }*/
     nodes += perft(depth - 1, newPositions[i]);
   }
   return nodes;

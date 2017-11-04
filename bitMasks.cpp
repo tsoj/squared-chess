@@ -61,6 +61,20 @@ namespace BitMasks
   const std::array<Bitboard, 64> knightAttackTable = generateKnightAttackTable();
   const std::array<Bitboard, 64> kingAttackTable = generateKingAttackTable();
 
+  std::array<PositionValue, 7> generatePieceValue()
+  {
+    std::array<PositionValue, 7>ret;
+    ret[KING] = 100000;
+    ret[QUEEN] = 900;
+    ret[ROOK] = 500;
+    ret[BISHOP] = 300;
+    ret[KNIGHT] = 290;
+    ret[PAWN] = 100;
+    ret[NO_PIECE] = 0;
+    return ret;
+  }
+  const std::array<PositionValue, 7> pieceValues = generatePieceValue();
+
   Bitboard rankToFile(Bitboard rank)
   {
     Bitboard ret = (((rank & 0b11111111) * MAIN_DIAGONAL) & files[7]) >> 7;

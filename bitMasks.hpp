@@ -45,6 +45,7 @@ namespace BitMasks
   extern const std::array<Bitboard, 2> castlingKingsideOccupancyRelevant;
   extern const std::array<Bitboard, 2> castlingQueensideOccupancyRelevant;
 
+  extern const std::array<PositionValue, 7> pieceValues;
 
   template<PIECE_TYPE Pt>
   Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex);
