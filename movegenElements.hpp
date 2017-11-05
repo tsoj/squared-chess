@@ -3,11 +3,12 @@
 #include "bitMasks.hpp"
 #include "bitOperations.hpp"
 #include "utils.hpp"
+#include <vector>
 
 using namespace BitOperations;
 using namespace BitMasks;
 
-bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position, int kingsIndex)
+inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position, int kingsIndex)
 {
   static int moveDirection;
   //PAWN
@@ -70,7 +71,7 @@ bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position, i
   }
   return false;
 }
-bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position)
+inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position)
 {
     unsigned long kingsIndex;
     bitScanForward(kingsIndex, position.pieces[KING] & position.colors[us]);
@@ -78,7 +79,7 @@ bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position)
 }
 
 template<PIECE_TYPE Pt>
-void applyQuietMove(
+inline void applyQuietMove(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   Position & newPosition,
   const int & toFieldIndex, const int & fromFieldIndex
@@ -94,7 +95,7 @@ void applyQuietMove(
   newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
 }
 template<PIECE_TYPE Pt>
-void applyCaptureMove(
+inline void applyCaptureMove(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   Position & newPosition,
   const int & toFieldIndex, const int & fromFieldIndex
@@ -118,7 +119,7 @@ void applyCaptureMove(
   newPosition.castling[enemy] &= ~bitAtIndex[toFieldIndex];
 }
 
-void applyCaptureEnPassantMove(
+inline void applyCaptureEnPassantMove(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   Position & newPosition,
   const int & toFieldIndex, const int & fromFieldIndex,
@@ -137,7 +138,7 @@ void applyCaptureEnPassantMove(
 }
 
 template<PIECE_TYPE Pt>
-void generateMoves(
+inline void generateMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
   const Bitboard & occupancy,
@@ -188,7 +189,7 @@ void generateMoves(
 }
 
 //TODO: promotion
-void generatePawnMoves(
+inline void generatePawnMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
   std::vector<Position> & newPositions,
@@ -357,7 +358,7 @@ void generatePawnMoves(
 }
 
 
-void generateCastlingMoves(
+inline void generateCastlingMoves(
     const COLOR_TYPE & us, const COLOR_TYPE & enemy,
     const Position & origPosition,
     std::vector<Position> & newPositions,
@@ -370,7 +371,8 @@ void generateCastlingMoves(
     (!isKingInCheck(us, enemy, origPosition, castlingKingFrom[us]) &&
     !isKingInCheck(us, enemy, origPosition, castlingKingKingsideTo[us]) &&
     !isKingInCheck(us, enemy, origPosition, castlingKingsideCheckRelevant[us])) &&
-    !(occupancy & castlingKingsideOccupancyRelevant[us])
+    !(occupancy & castlingKingsideOccupancyRelevant[us]) &&
+    (origPosition.castling[us] & castlingRookKingsideFrom[us])
   )
   {
     newPosition = origPosition;
@@ -394,7 +396,8 @@ void generateCastlingMoves(
     (!isKingInCheck(us, enemy, origPosition, castlingKingFrom[us]) &&
     !isKingInCheck(us, enemy, origPosition, castlingKingQueensideTo[us]) &&
     !isKingInCheck(us, enemy, origPosition, castlingQueensideCheckRelevant[us])) &&
-    !(occupancy & castlingQueensideOccupancyRelevant[us])
+    !(occupancy & castlingQueensideOccupancyRelevant[us]) &&
+    (origPosition.castling[us] & castlingRookQueensideFrom[us])
   )
   {
     newPosition = origPosition;
