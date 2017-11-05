@@ -6,7 +6,6 @@
 #include "movegen.hpp"
 #include "movegenElements.hpp"
 
-inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position);
 
 inline void generateAllMoves(
   const COLOR_TYPE & us,

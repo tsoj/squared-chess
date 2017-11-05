@@ -18,6 +18,10 @@ inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosit
     sortMoves(us, enemy, origPosition, newPositions);
     for(int i = 0; i < newPositions.size; i++)
     {
+      if(isKingInCheck(us, enemy, newPositions.array[i]))
+      {
+        continue;
+      }
       currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha);
       if(alpha < currentValue)
       {
