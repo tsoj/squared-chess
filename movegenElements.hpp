@@ -8,7 +8,7 @@
 using namespace BitOperations;
 using namespace BitMasks;
 
-inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position, int kingsIndex)
+inline bool isKingInCheck(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Position & position, int kingsIndex)
 {
   static int moveDirection;
   //PAWN
@@ -71,7 +71,7 @@ inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & posi
   }
   return false;
 }
-inline bool isKingInCheck(COLOR_TYPE us, COLOR_TYPE enemy, const Position & position)
+inline bool isKingInCheck(const COLOR_TYPE &  us, const COLOR_TYPE &  enemy, const Position & position)
 {
     unsigned long kingsIndex;
     bitScanForward(kingsIndex, position.pieces[KING] & position.colors[us]);
@@ -84,7 +84,6 @@ inline void applyQuietMove(
   Position & newPosition,
   const int & toFieldIndex, const int & fromFieldIndex
 )
-
 {
   newPosition.lastCapturedPieceType = NO_PIECE;
   newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];

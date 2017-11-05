@@ -17,11 +17,11 @@ int main()
 {
   //initStack();
   Position p;
-  p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+  p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq -");
   printPosition(p);
   //printPositionBitboards(p);
   //std::cout << std::endl <<  negaMax(WHITE, BLACK, p, 5, -POSITION_VALUE_INFINITY, POSITION_VALUE_INFINITY) << std::endl;
-  p = startSearchMinMax(p, 6);
+  p = startSearch(p, 6);
   /*std::vector<Position> newPositions;
   Bitboard occupancy = p.colors[WHITE] | p.colors[BLACK];
   generateAllMoves(WHITE, BLACK, p, newPositions);
