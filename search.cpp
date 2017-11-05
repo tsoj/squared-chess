@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta)
+/*PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta)
 {
   if(depth<=0)
   {
@@ -67,7 +67,7 @@ void startSearch(Position origPosition, int depth)
   printPosition(newPositions[bestBoardIndex]);
   std::cout << "Evaluation: " << ret << std::endl;
 }
-
+*/
 
 PositionValue minMaxBlack(Position origPosition, int depth, PositionValue alpha, PositionValue beta);
 PositionValue minMaxWhite(Position origPosition, int depth, PositionValue alpha, PositionValue beta)
@@ -77,9 +77,10 @@ PositionValue minMaxWhite(Position origPosition, int depth, PositionValue alpha,
       return evaluation(WHITE, origPosition);
     }
     static PositionValue currentValue;
-    std::vector<Position> newPositions;
-    generateAllMoves(WHITE, BLACK, origPosition, newPositions);
-    for(int i = 0; i < newPositions.size(); i++)
+    PositionArray newPositions;
+    int numberNewPositions;
+    generateAllMoves(WHITE, BLACK, origPosition, newPositions, numberNewPositions);
+    for(int i = 0; i < numberNewPositions; i++)
     {
       currentValue = minMaxBlack(newPositions[i], depth - 1, beta, alpha);
       if(alpha < currentValue)
@@ -101,9 +102,10 @@ PositionValue minMaxBlack(Position origPosition, int depth, PositionValue alpha,
       return evaluation(WHITE, origPosition);
     }
     static PositionValue currentValue;
-    std::vector<Position> newPositions;
-    generateAllMoves(BLACK, WHITE, origPosition, newPositions);
-    for(int i = 0; i < newPositions.size(); i++)
+    PositionArray newPositions;
+    int numberNewPositions;
+    generateAllMoves(BLACK, WHITE, origPosition, newPositions, numberNewPositions);
+    for(int i = 0; i < numberNewPositions; i++)
     {
       currentValue = minMaxWhite(newPositions[i], depth - 1, beta, alpha);
       if(alpha > currentValue)
@@ -122,13 +124,14 @@ Position startSearchMinMax(Position origPosition, int depth)
 {
   PositionValue ret;
   PositionValue currentValue;
-  std::vector<Position> newPositions;
+  PositionArray newPositions;
   int bestBoardIndex = 0;
+  int numberNewPositions;
   if(origPosition.whoIsToMove == WHITE_TO_MOVE)
   {
     ret = -POSITION_VALUE_INFINITY;
-    generateAllMoves(WHITE, BLACK, origPosition, newPositions);
-    for(int i = 0; i < newPositions.size(); i++)
+    generateAllMoves(WHITE, BLACK, origPosition, newPositions, numberNewPositions);
+    for(int i = 0; i < numberNewPositions; i++)
     {
       currentValue = minMaxBlack(newPositions[i], depth - 1, POSITION_VALUE_INFINITY, ret);
       if(ret < currentValue)
@@ -141,8 +144,8 @@ Position startSearchMinMax(Position origPosition, int depth)
   else
   {
     ret = POSITION_VALUE_INFINITY;
-    generateAllMoves(BLACK, WHITE, origPosition, newPositions);
-    for(int i = 0; i < newPositions.size(); i++)
+    generateAllMoves(BLACK, WHITE, origPosition, newPositions, numberNewPositions);
+    for(int i = 0; i < numberNewPositions; i++)
     {
       currentValue = minMaxWhite(newPositions[i], depth - 1, -POSITION_VALUE_INFINITY, ret);
       if(ret > currentValue)

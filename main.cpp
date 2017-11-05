@@ -22,11 +22,6 @@ int main()
   //printPositionBitboards(p);
   //std::cout << std::endl <<  negaMax(WHITE, BLACK, p, 5, -POSITION_VALUE_INFINITY, POSITION_VALUE_INFINITY) << std::endl;
   p = startSearchMinMax(p, 6);
-  p = startSearchMinMax(p, 5);
-  p = startSearchMinMax(p, 4);
-  p = startSearchMinMax(p, 3);
-  p = startSearchMinMax(p, 2);
-  p = startSearchMinMax(p, 1);
   /*std::vector<Position> newPositions;
   Bitboard occupancy = p.colors[WHITE] | p.colors[BLACK];
   generateAllMoves(WHITE, BLACK, p, newPositions);

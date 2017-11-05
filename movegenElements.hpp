@@ -142,7 +142,8 @@ inline void generateMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
   const Bitboard & occupancy,
-  std::vector<Position> & newPositions
+  PositionArray & newPositions,
+  int & numberNewPositions
 )
 {
   static Bitboard pieceOccupancy;
@@ -168,7 +169,8 @@ inline void generateMoves(
           bitScanForward(toFieldIndex, quietAttackMask);
           newPosition = origPosition;
           applyQuietMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           quietAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(quietAttackMask);
       }
@@ -179,7 +181,8 @@ inline void generateMoves(
           bitScanForward(toFieldIndex, captureAttackMask);
           newPosition = origPosition;
           applyCaptureMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           captureAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(captureAttackMask);
       }
@@ -192,7 +195,8 @@ inline void generateMoves(
 inline void generatePawnMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
-  std::vector<Position> & newPositions,
+  PositionArray & newPositions,
+  int & numberNewPositions,
   const Bitboard & enPassant
 )
 {
@@ -233,23 +237,27 @@ inline void generatePawnMoves(
 
         newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
         newPosition.lastMovedPieceType = KNIGHT;
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
         newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
 
         newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
         newPosition.lastMovedPieceType = BISHOP;
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
         newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
 
         newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
         newPosition.lastMovedPieceType = ROOK;
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
         newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
 
         newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
         newPosition.lastMovedPieceType = QUEEN;
       }
-      newPositions.push_back(newPosition);
+      newPositions[numberNewPositions] = newPosition;
+      numberNewPositions++;
 
       toFieldIndex += moveDirection;
       if(
@@ -260,7 +268,8 @@ inline void generatePawnMoves(
         newPosition = origPosition;
         newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
         applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
       }
     }
     toFieldIndex = fromFieldIndex + moveDirection + EAST;
@@ -277,7 +286,8 @@ inline void generatePawnMoves(
           enPassant,
           moveDirection
         );
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
       }
       else
       {
@@ -289,23 +299,27 @@ inline void generatePawnMoves(
 
           newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = KNIGHT;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = BISHOP;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = ROOK;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = QUEEN;
         }
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
       }
     }
     toFieldIndex = fromFieldIndex + moveDirection + WEST;
@@ -322,7 +336,8 @@ inline void generatePawnMoves(
           enPassant,
           moveDirection
         );
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
       }
       else
       {
@@ -334,23 +349,27 @@ inline void generatePawnMoves(
 
           newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = KNIGHT;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = BISHOP;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = ROOK;
-          newPositions.push_back(newPosition);
+          newPositions[numberNewPositions] = newPosition;
+          numberNewPositions++;
           newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
 
           newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
           newPosition.lastMovedPieceType = QUEEN;
         }
-        newPositions.push_back(newPosition);
+        newPositions[numberNewPositions] = newPosition;
+        numberNewPositions++;
       }
     }
     pawnOccupancy &= ~bitAtIndex[fromFieldIndex];
@@ -361,7 +380,8 @@ inline void generatePawnMoves(
 inline void generateCastlingMoves(
     const COLOR_TYPE & us, const COLOR_TYPE & enemy,
     const Position & origPosition,
-    std::vector<Position> & newPositions,
+    PositionArray & newPositions,
+    int & numberNewPositions,
     const Bitboard & occupancy
 )
 {
@@ -389,7 +409,8 @@ inline void generateCastlingMoves(
     newPosition.lastPieceMovedToIndex = castlingKingKingsideTo[us];
     newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
     newPosition.castling[us] = 0;
-    newPositions.push_back(newPosition);
+    newPositions[numberNewPositions] = newPosition;
+    numberNewPositions++;
   }
   //queenside
   if(
@@ -414,6 +435,7 @@ inline void generateCastlingMoves(
     newPosition.lastPieceMovedToIndex = castlingKingQueensideTo[us];
     newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
     newPosition.castling[us] = 0;
-    newPositions.push_back(newPosition);
+    newPositions[numberNewPositions] = newPosition;
+    numberNewPositions++;
   }
 }

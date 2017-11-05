@@ -12,11 +12,13 @@ inline void generateAllMoves(
   const COLOR_TYPE & us,
   const COLOR_TYPE & enemy,
   Position origPosition,
-  std::vector<Position> & newPositions
+  PositionArray & newPositions,
+  int & numberNewPositions
 )
 {
   static Bitboard enPassant;
   static Bitboard occupancy;
+  numberNewPositions = 0;
   enPassant = origPosition.enPassant;
   origPosition.enPassant = 0;
   origPosition.whoIsToMove *= -1;
@@ -27,42 +29,49 @@ inline void generateAllMoves(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions
+    newPositions,
+    numberNewPositions
   );
   generateMoves<BISHOP>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions
+    newPositions,
+    numberNewPositions
   );
   generateMoves<ROOK>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions
+    newPositions,
+    numberNewPositions
   );
   generateMoves<QUEEN>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions
+    newPositions,
+    numberNewPositions
   );
   generateMoves<KING>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions
+    newPositions,
+    numberNewPositions
   );
   generatePawnMoves(
     us, enemy,
     origPosition,
     newPositions,
+    numberNewPositions,
     enPassant
   );
   generateCastlingMoves(
       us, enemy,
       origPosition,
       newPositions,
+      numberNewPositions,
       occupancy
   );
 

@@ -22,14 +22,15 @@ uint64 perft(int depth, const Position & origPosition)
     us = BLACK;
     enemy = WHITE;
   }
-  std::vector<Position> newPositions;
+  PositionArray newPositions;
+  int numberNewPositions = 0;
   uint64 nodes = 0;
   if (depth == 0)
   {
     return 1;
   }
-  generateAllMoves(us, enemy, origPosition, newPositions);
-  for (int i = 0; i < newPositions.size(); i++) {
+  generateAllMoves(us, enemy, origPosition, newPositions, numberNewPositions);
+  for (int i = 0; i < numberNewPositions; i++) {
     /*if(isKingInCheck(us, enemy, newPositions[i]))
     {
       if(depth == 1)
