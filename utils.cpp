@@ -281,19 +281,20 @@ Position setPositionFromFen(std::string fenString)
   {
     if(castling[i] == 'K')
     {
-      position.castling[WHITE] |= bitAtIndex[7];
+      position.castling[WHITE] |= bitAtIndex[castlingRookKingsideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
+
     }
     else if(castling[i] == 'Q')
     {
-      position.castling[WHITE] |= bitAtIndex[0];
+      position.castling[WHITE] |= bitAtIndex[castlingRookQueensideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
     }
     else if(castling[i] == 'k')
     {
-      position.castling[BLACK] |= bitAtIndex[63];
+      position.castling[BLACK] |= bitAtIndex[castlingRookKingsideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
     }
     else if(castling[i] == 'q')
     {
-      position.castling[BLACK] |= bitAtIndex[56];
+      position.castling[BLACK] |= bitAtIndex[castlingRookQueensideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
     }
   }
   int row = -1;

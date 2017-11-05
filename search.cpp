@@ -4,21 +4,21 @@
 #include "utils.hpp"
 #include <vector>
 #include <iostream>
+#include "moveOrdering.hpp"
 
-
-PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta)
+inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta)
 {
     if(depth<=0)
     {
       return evaluation(us, origPosition);
     }
     static PositionValue currentValue;
-    PositionArray newPositions;
-    int numberNewPositions;
-    generateAllMoves(us, enemy, origPosition, newPositions, numberNewPositions);
-    for(int i = 0; i < numberNewPositions; i++)
+    PositionVector newPositions;
+    generateAllMoves(us, enemy, origPosition, newPositions);
+    sortMoves(us, enemy, origPosition, newPositions);
+    for(int i = 0; i < newPositions.size; i++)
     {
-      currentValue = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+      currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha);
       if(alpha < currentValue)
       {
         alpha = currentValue;
@@ -50,20 +50,19 @@ Position startSearch(Position origPosition, int depth)
     PositionValue alpha = -POSITION_VALUE_INFINITY;
     PositionValue beta = POSITION_VALUE_INFINITY;
     PositionValue currentValue;
-    PositionArray newPositions;
+    PositionVector newPositions;
     int bestBoardIndex = 0;
-    int numberNewPositions;
-    generateAllMoves(us, enemy, origPosition, newPositions, numberNewPositions);
-    for(int i = 0; i < numberNewPositions; i++)
+    generateAllMoves(us, enemy, origPosition, newPositions);
+    for(int i = 0; i < newPositions.size; i++)
     {
-      currentValue = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+      currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha);
       if(alpha < currentValue)
       {
         alpha = currentValue;
         bestBoardIndex = i;
       }
     }
-    printPosition(newPositions[bestBoardIndex]);
+    printPosition(newPositions.array[bestBoardIndex]);
     std::cout << "Evaluation: " << alpha << std::endl;
-    return newPositions[bestBoardIndex];
+    return newPositions.array[bestBoardIndex];
 }

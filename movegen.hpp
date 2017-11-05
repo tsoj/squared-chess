@@ -12,13 +12,12 @@ inline void generateAllMoves(
   const COLOR_TYPE & us,
   const COLOR_TYPE & enemy,
   Position origPosition,
-  PositionArray & newPositions,
-  int & numberNewPositions
+  PositionVector & newPositions
 )
 {
   static Bitboard enPassant;
   static Bitboard occupancy;
-  numberNewPositions = 0;
+  newPositions.size = 0;
   enPassant = origPosition.enPassant;
   origPosition.enPassant = 0;
   origPosition.whoIsToMove *= -1;
@@ -29,49 +28,42 @@ inline void generateAllMoves(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions,
-    numberNewPositions
+    newPositions
   );
   generateMoves<BISHOP>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions,
-    numberNewPositions
+    newPositions
   );
   generateMoves<ROOK>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions,
-    numberNewPositions
+    newPositions
   );
   generateMoves<QUEEN>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions,
-    numberNewPositions
+    newPositions
   );
   generateMoves<KING>(
     us, enemy,
     origPosition,
     occupancy,
-    newPositions,
-    numberNewPositions
+    newPositions
   );
   generatePawnMoves(
     us, enemy,
     origPosition,
     newPositions,
-    numberNewPositions,
     enPassant
   );
   generateCastlingMoves(
       us, enemy,
       origPosition,
       newPositions,
-      numberNewPositions,
       occupancy
   );
 

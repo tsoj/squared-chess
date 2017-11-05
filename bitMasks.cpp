@@ -556,16 +556,6 @@ namespace BitMasks
     0,//white
     56//black
   };
-  const std::array<int, 2> castlingKingsideCheckRelevant =
-  {
-    5,//white
-    61//black
-  };
-  const std::array<int, 2> castlingQueensideCheckRelevant =
-  {
-    3,//white
-    59//black
-  };
   const std::array<Bitboard, 2> castlingKingsideOccupancyRelevant =
   {
     bitAtIndex[5] | bitAtIndex[6],//white

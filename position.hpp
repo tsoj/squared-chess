@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include <array>
 
 class Position
 {
@@ -19,6 +20,8 @@ public:
   PIECE_TYPE lastMovedPieceType;
   PIECE_TYPE lastCapturedPieceType;
 
+  PositionValue positionValue;
+
   void setToStartposition();
   void clearBoard();
   int getNumberHalfmovesPlayed();
@@ -28,4 +31,18 @@ public:
 
   //void printAllBitboards();
   void printPosition();
+
+  static bool cmp(const Position &a, const Position &b)
+  {
+    return a.positionValue > b.positionValue;
+  }
+};
+
+
+#define MAX_NUMBER_MOVES_PER_POSITION 128
+class Position;
+struct PositionVector
+{
+  std::array<Position, MAX_NUMBER_MOVES_PER_POSITION> array;
+  int size;
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 
 #ifdef _MSC_VER
   #ifdef _M_IX86
@@ -53,7 +52,3 @@ enum COLOR_TYPE {WHITE, BLACK, NO_COLOR};
 
 typedef int PositionValue;
 #define POSITION_VALUE_INFINITY 2000000000
-
-#define MAX_NUMBER_MOVES_PER_POSITION 128
-class Position;
-typedef std::array<Position, MAX_NUMBER_MOVES_PER_POSITION> PositionArray;
