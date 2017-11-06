@@ -6,26 +6,23 @@
 #include <iostream>
 
 using namespace BitMasks;
-
-inline void sortMoves(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Position & origPosition, PositionVector & positions)
+inline void sortMoves(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Position & origPosition, PositionVector & newPositions, const Move & killerMove)
 {
-  static PositionValue mvvLva_Value; //MVV-LVA (Most Valuable Victim - Least Valuable Aggressor)
-  for(int i = 0; i<positions.size; i++)
+  for(int i = 0; i<newPositions.size; i++)
   {
-    positions.array[i].positionValue = 0;
-    if(positions.array[i].lastCapturedPieceType != NO_PIECE)
+
+    newPositions.array[i].positionValue = 0;
+    if(newPositions.array[i].lastMove.lastCaptured != NO_PIECE)
     {
-
-      mvvLva_Value = pieceValues[positions.array[i].lastCapturedPieceType]*10 - pieceValues[positions.array[i].lastMovedPieceType];
-
-      /*if(origPosition.lastPieceMovedToIndex != positions.array[i].lastPieceMovedToIndex)
-      {
-        positions.array[i].positionValue -= pieceValues[positions.array[i].lastMovedPieceType];
-      }*/
-
-      positions.array[i].positionValue = mvvLva_Value;
+      newPositions.array[i].positionValue += pieceValues[newPositions.array[i].lastMove.lastCaptured]*10 - pieceValues[newPositions.array[i].lastMove.lastMoved];
     }
+    else if(newPositions.array[i].lastMove == killerMove)
+    {
+      newPositions.array[i].positionValue += 10;
+      //std::cout << ++o <<std::endl;
+    }
+    newPositions.array[i].positionValue += pieceValues[newPositions.array[i].lastMove.promotedTo];
   }
-  std::sort(positions.array.begin(), positions.array.begin() + positions.size, Position::cmp);
+  std::sort(newPositions.array.begin(), newPositions.array.begin() + newPositions.size, Position::cmpValue);
 
 }

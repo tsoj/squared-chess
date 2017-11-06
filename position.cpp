@@ -25,10 +25,11 @@ void Position::setToStartposition()
   castling[WHITE] = 0b0000000000000000000000000000000000000000000000000000000010010001;
   whoIsToMove = WHITE_TO_MOVE;
   numberHalfmovesPlayed = 0;
-  lastPieceMovedToIndex = 0;
-  lastPieceMovedFromIndex = 0;
-  lastMovedPieceType = NO_PIECE;
-  lastCapturedPieceType = NO_PIECE;
+  lastMove.to = 0;
+  lastMove.from = 0;
+  lastMove.lastMoved = NO_PIECE;
+  lastMove.lastCaptured = NO_PIECE;
+  lastMove.promotedTo = NO_PIECE;
 }
 
 void Position::clearBoard()
@@ -46,10 +47,11 @@ void Position::clearBoard()
   castling[BLACK] = 0b0;
   whoIsToMove = WHITE_TO_MOVE;
   numberHalfmovesPlayed = 0;
-  lastPieceMovedToIndex = 0;
-  lastPieceMovedFromIndex = 0;
-  lastMovedPieceType = NO_PIECE;
-  lastCapturedPieceType = NO_PIECE;
+  lastMove.to = 0;
+  lastMove.from = 0;
+  lastMove.lastMoved = NO_PIECE;
+  lastMove.lastCaptured = NO_PIECE;
+  lastMove.promotedTo = NO_PIECE;
 }
 
 

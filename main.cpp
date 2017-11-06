@@ -24,18 +24,31 @@ int main()
   {
     PositionVector newPositions;
     newPositions.size = 0;
-    generateCastlingMoves(WHITE, BLACK, p, newPositions, p.colors[BLACK] | p.colors[WHITE]);
+    generateAllMoves(BLACK, WHITE, p, newPositions);
     for(int i = 0; i<newPositions.size; i++)
     {
       printPosition(newPositions.array[i]);
-      //printPositionBitboards(newPositions.array[i]);
+      newPositions.array[i].lastMove.print();
     }
   }
-  while(true)
+  if(true)
   {
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     p = startSearch(p, 8);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+  }
+  if(false)
+  {
+    Move m1;
+    Move m2;
+    m2.from=13;
+    m1.from=13;
+    m2.to=40;
+    m1.to=40;
+    if(m1==m2)
+    {
+      std::cout <<"hi"<<std::endl;
+    }
   }
 }

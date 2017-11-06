@@ -382,11 +382,13 @@ void printPositionBitboards(Position position)
   std::cout << "castling black:" << std::endl;
   printBitboard(position.castling[BLACK]);
   std::cout << "last piece moved to index:" << std::endl;
-  std::cout << position.lastPieceMovedToIndex << std::endl;
+  std::cout << position.lastMove.to << std::endl;
   std::cout << "last piece moved from index:" << std::endl;
-  std::cout << position.lastPieceMovedFromIndex << std::endl;
+  std::cout << position.lastMove.from << std::endl;
   std::cout << "last piecetype moved:" << std::endl;
-  std::cout << position.lastMovedPieceType << std::endl;
+  std::cout << position.lastMove.lastMoved << std::endl;
   std::cout << "last piecestype captured:" << std::endl;
-  std::cout << position.lastCapturedPieceType << std::endl;
+  std::cout << position.lastMove.lastCaptured << std::endl;
+  std::cout << "last promotion:" << std::endl;
+  std::cout << position.lastMove.promotedTo << std::endl;
 }

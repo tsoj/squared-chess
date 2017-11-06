@@ -8,6 +8,7 @@
 using namespace BitOperations;
 using namespace BitMasks;
 
+
 inline bool isKingInCheck(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Position & position, int kingsIndex)
 {
   static int moveDirection;
@@ -85,12 +86,13 @@ inline void applyQuietMove(
   const int & toFieldIndex, const int & fromFieldIndex
 )
 {
-  newPosition.lastCapturedPieceType = NO_PIECE;
+  newPosition.lastMove.lastCaptured = NO_PIECE;
+  newPosition.lastMove.promotedTo = NO_PIECE;
   newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.pieces[Pt] = (newPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.lastMovedPieceType = Pt;
-  newPosition.lastPieceMovedToIndex = toFieldIndex;
-  newPosition.lastPieceMovedFromIndex = fromFieldIndex;
+  newPosition.lastMove.lastMoved = Pt;
+  newPosition.lastMove.to = toFieldIndex;
+  newPosition.lastMove.from = fromFieldIndex;
   newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
 }
 template<PIECE_TYPE Pt>
@@ -102,18 +104,19 @@ inline void applyCaptureMove(
 {
   for(int i = 0; i<6; i+=1)
   {
+    newPosition.lastMove.promotedTo = NO_PIECE;
     if(newPosition.pieces[i] & bitAtIndex[toFieldIndex])
     {
-      newPosition.lastCapturedPieceType = PIECE_TYPE(i);
+      newPosition.lastMove.lastCaptured = PIECE_TYPE(i);
       newPosition.colors[enemy] = newPosition.colors[enemy] & ~bitAtIndex[toFieldIndex];
       newPosition.pieces[PIECE_TYPE(i)] = newPosition.pieces[PIECE_TYPE(i)] & ~bitAtIndex[toFieldIndex];
     }
   }
   newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.pieces[Pt] = (newPosition.pieces[Pt] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.lastMovedPieceType = Pt;
-  newPosition.lastPieceMovedToIndex = toFieldIndex;
-  newPosition.lastPieceMovedFromIndex = fromFieldIndex;
+  newPosition.lastMove.lastMoved = Pt;
+  newPosition.lastMove.to = toFieldIndex;
+  newPosition.lastMove.from = fromFieldIndex;
   newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
   newPosition.castling[enemy] &= ~bitAtIndex[toFieldIndex];
 }
@@ -126,14 +129,14 @@ inline void applyCaptureEnPassantMove(
   const int & moveDirection
 )
 {
-  newPosition.lastCapturedPieceType = PAWN;
+  newPosition.lastMove.lastCaptured = PAWN;
   newPosition.colors[enemy] = newPosition.colors[enemy] & ~bitAtIndex[toFieldIndex - moveDirection];
   newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex - moveDirection];
   newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
   newPosition.pieces[PAWN] = (newPosition.pieces[PAWN] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
-  newPosition.lastMovedPieceType = PAWN;
-  newPosition.lastPieceMovedToIndex = toFieldIndex;
-  newPosition.lastPieceMovedFromIndex = fromFieldIndex;
+  newPosition.lastMove.lastMoved = PAWN;
+  newPosition.lastMove.to = toFieldIndex;
+  newPosition.lastMove.from = fromFieldIndex;
 }
 
 template<PIECE_TYPE Pt>
@@ -189,7 +192,34 @@ inline void generateMoves(
   }
 }
 
-//TODO: promotion
+
+#define ADD_PROMOTION \
+newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex];\
+\
+newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];\
+newPosition.lastMove.lastMoved = KNIGHT;\
+newPosition.lastMove.promotedTo = KNIGHT;\
+newPositions.array[newPositions.size] = newPosition;\
+newPositions.size++;\
+newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];\
+\
+newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];\
+newPosition.lastMove.lastMoved = BISHOP;\
+newPosition.lastMove.promotedTo = BISHOP;\
+newPositions.array[newPositions.size] = newPosition;\
+newPositions.size++;\
+newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];\
+\
+newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];\
+newPosition.lastMove.lastMoved = ROOK;\
+newPosition.lastMove.promotedTo = ROOK;\
+newPositions.array[newPositions.size] = newPosition;\
+newPositions.size++;\
+newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];\
+\
+newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];\
+newPosition.lastMove.lastMoved = QUEEN;\
+newPosition.lastMove.promotedTo = QUEEN;
 inline void generatePawnMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
@@ -230,28 +260,7 @@ inline void generatePawnMoves(
       applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
       if(bitAtIndex[toFieldIndex] & promotionMove)
       {
-        newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex];
-
-        newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
-        newPosition.lastMovedPieceType = KNIGHT;
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-        newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
-
-        newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
-        newPosition.lastMovedPieceType = BISHOP;
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-        newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
-
-        newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
-        newPosition.lastMovedPieceType = ROOK;
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-        newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
-
-        newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
-        newPosition.lastMovedPieceType = QUEEN;
+        ADD_PROMOTION
       }
       newPositions.array[newPositions.size] = newPosition;
       newPositions.size++;
@@ -292,28 +301,7 @@ inline void generatePawnMoves(
         applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         if(bitAtIndex[toFieldIndex] & promotionMove)
         {
-          newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = KNIGHT;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = BISHOP;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = ROOK;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = QUEEN;
+          ADD_PROMOTION
         }
         newPositions.array[newPositions.size] = newPosition;
         newPositions.size++;
@@ -342,28 +330,7 @@ inline void generatePawnMoves(
         applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         if(bitAtIndex[toFieldIndex] & promotionMove)
         {
-          newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = KNIGHT;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = BISHOP;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = ROOK;
-          newPositions.array[newPositions.size] = newPosition;
-          newPositions.size++;
-          newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];
-
-          newPosition.pieces[QUEEN] = newPosition.pieces[QUEEN] | bitAtIndex[toFieldIndex];
-          newPosition.lastMovedPieceType = QUEEN;
+          ADD_PROMOTION
         }
         newPositions.array[newPositions.size] = newPosition;
         newPositions.size++;
@@ -390,7 +357,7 @@ inline void generateCastlingMoves(
   )
   {
     newPosition = origPosition;
-    newPosition.lastCapturedPieceType = NO_PIECE;
+    newPosition.lastMove.lastCaptured = NO_PIECE;
     newPosition.colors[us] =
       (newPosition.colors[us] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingKingsideTo[us]];
     newPosition.pieces[KING] =
@@ -399,9 +366,9 @@ inline void generateCastlingMoves(
       (newPosition.colors[us] & ~bitAtIndex[castlingRookKingsideFrom[us]]) | bitAtIndex[castlingRookKingsideTo[us]];
     newPosition.pieces[ROOK] =
       (newPosition.pieces[ROOK] & ~bitAtIndex[castlingRookKingsideFrom[us]]) | bitAtIndex[castlingRookKingsideTo[us]];
-    newPosition.lastMovedPieceType = KING;
-    newPosition.lastPieceMovedToIndex = castlingKingKingsideTo[us];
-    newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
+    newPosition.lastMove.lastMoved = KING;
+    newPosition.lastMove.to = castlingKingKingsideTo[us];
+    newPosition.lastMove.from = castlingKingFrom[us];
     newPosition.castling[us] = 0;
     newPositions.array[newPositions.size] = newPosition;
     newPositions.size++;
@@ -414,7 +381,7 @@ inline void generateCastlingMoves(
   )
   {
     newPosition = origPosition;
-    newPosition.lastCapturedPieceType = NO_PIECE;
+    newPosition.lastMove.lastCaptured = NO_PIECE;
     newPosition.colors[us] =
       (newPosition.colors[us] & ~bitAtIndex[castlingKingFrom[us]]) | bitAtIndex[castlingKingQueensideTo[us]];
     newPosition.pieces[KING] =
@@ -423,9 +390,9 @@ inline void generateCastlingMoves(
       (newPosition.colors[us] & ~bitAtIndex[castlingRookQueensideFrom[us]]) | bitAtIndex[castlingRookQueensideTo[us]];
     newPosition.pieces[ROOK] =
       (newPosition.pieces[ROOK] & ~bitAtIndex[castlingRookQueensideFrom[us]]) | bitAtIndex[castlingRookQueensideTo[us]];
-    newPosition.lastMovedPieceType = KING;
-    newPosition.lastPieceMovedToIndex = castlingKingQueensideTo[us];
-    newPosition.lastPieceMovedFromIndex = castlingKingFrom[us];
+    newPosition.lastMove.lastMoved = KING;
+    newPosition.lastMove.to = castlingKingQueensideTo[us];
+    newPosition.lastMove.from = castlingKingFrom[us];
     newPosition.castling[us] = 0;
     newPositions.array[newPositions.size] = newPosition;
     newPositions.size++;
