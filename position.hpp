@@ -38,16 +38,16 @@ public:
   Bitboard colors[2];
   Bitboard pieces[6];
   Bitboard enPassant;//if enpassant is possible, one bit will be set where a enemy pawn must capture this pawn
-  Bitboard castling[2];//if castling is allowed then the bit at the rook index that allows castling will be set
-  int whoIsToMove; //1 for white, -1 for black to move
-  int numberHalfmovesPlayed; //1 for white, -1 for black to move
+  Bitboard castling;//if castling is allowed then the bit at the rook index that allows castling will be set
+  short whoIsToMove; //1 for white, -1 for black to move
+  short numberHalfmovesPlayed; //1 for white, -1 for black to move
   Move lastMove;
   PositionValue positionValue;
 
   void setToStartposition();
   void clearBoard();
-  int getNumberHalfmovesPlayed();
-  int getNumberMovesPlayed();
+  short getNumberHalfmovesPlayed();
+  short getNumberMovesPlayed();
   bool whiteToMove();
   bool blackToMove();
 

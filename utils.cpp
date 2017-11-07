@@ -281,20 +281,20 @@ Position setPositionFromFen(std::string fenString)
   {
     if(castling[i] == 'K')
     {
-      position.castling[WHITE] |= bitAtIndex[castlingRookKingsideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
+      position.castling |= bitAtIndex[castlingRookKingsideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
 
     }
     else if(castling[i] == 'Q')
     {
-      position.castling[WHITE] |= bitAtIndex[castlingRookQueensideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
+      position.castling |= bitAtIndex[castlingRookQueensideFrom[WHITE]] | bitAtIndex[castlingKingFrom[WHITE]];
     }
     else if(castling[i] == 'k')
     {
-      position.castling[BLACK] |= bitAtIndex[castlingRookKingsideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
+      position.castling |= bitAtIndex[castlingRookKingsideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
     }
     else if(castling[i] == 'q')
     {
-      position.castling[BLACK] |= bitAtIndex[castlingRookQueensideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
+      position.castling |= bitAtIndex[castlingRookQueensideFrom[BLACK]] | bitAtIndex[castlingKingFrom[BLACK]];
     }
   }
   int row = -1;
@@ -377,10 +377,8 @@ void printPositionBitboards(Position position)
   printBitboard(position.pieces[KING]);
   std::cout << "enPassant:" << std::endl;
   printBitboard(position.enPassant);
-  std::cout << "castling white:" << std::endl;
-  printBitboard(position.castling[WHITE]);
-  std::cout << "castling black:" << std::endl;
-  printBitboard(position.castling[BLACK]);
+  std::cout << "castling:" << std::endl;
+  printBitboard(position.castling);
   std::cout << "last piece moved to index:" << std::endl;
   std::cout << position.lastMove.to << std::endl;
   std::cout << "last piece moved from index:" << std::endl;

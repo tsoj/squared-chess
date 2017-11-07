@@ -11,32 +11,31 @@
 #include "evaluation.hpp"
 #include "search.hpp"
 #include "moveOrdering.hpp"
-#include <chrono>
 
 using namespace BitMasks;
 int main()
 {
   //initStack();
   Position p;
-  p = setPositionFromFen("r3k2r/pp1nnp1p/2pqb1p1/3p4/3PP3/2NB1P2/PPQ1N1PP/R3K2R w KQkq - 0 0");
+  //p = setPositionFromFen("r3k2r/pp1nnp1p/2pqb1p1/3p4/3PP3/2NB1P2/PPQ1N1PP/R3K2R w KQkq - 0 0");
+  p = setPositionFromFen("r3k2r/pp2n2p/n1p3p1/2P2p2/2bNB3/P4P2/1P4PP/RN2K2R w KQkq -");
   printPosition(p);
+  printPositionBitboards(p);
   if(false)
   {
     PositionVector newPositions;
     newPositions.size = 0;
-    generateAllMoves(BLACK, WHITE, p, newPositions);
+    generateAllMoves(WHITE, BLACK, p, newPositions);
     for(int i = 0; i<newPositions.size; i++)
     {
       printPosition(newPositions.array[i]);
       newPositions.array[i].lastMove.print();
+      printPositionBitboards(newPositions.array[i]);
     }
   }
   if(true)
   {
-    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    p = startSearch(p, 8);
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+    p = startSearch(p, 6);
   }
   if(false)
   {

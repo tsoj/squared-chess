@@ -93,7 +93,7 @@ inline void applyQuietMove(
   newPosition.lastMove.lastMoved = Pt;
   newPosition.lastMove.to = toFieldIndex;
   newPosition.lastMove.from = fromFieldIndex;
-  newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
+  newPosition.castling &= ~bitAtIndex[fromFieldIndex];
 }
 template<PIECE_TYPE Pt>
 inline void applyCaptureMove(
@@ -117,8 +117,8 @@ inline void applyCaptureMove(
   newPosition.lastMove.lastMoved = Pt;
   newPosition.lastMove.to = toFieldIndex;
   newPosition.lastMove.from = fromFieldIndex;
-  newPosition.castling[us] &= ~bitAtIndex[fromFieldIndex];
-  newPosition.castling[enemy] &= ~bitAtIndex[toFieldIndex];
+  newPosition.castling &= ~bitAtIndex[fromFieldIndex];
+  newPosition.castling &= ~bitAtIndex[toFieldIndex];
 }
 
 inline void applyCaptureEnPassantMove(
@@ -352,8 +352,8 @@ inline void generateCastlingMoves(
   //kingsside
   if(
     !(occupancy & castlingKingsideOccupancyRelevant[us]) &&
-    (origPosition.castling[us] & bitAtIndex[castlingRookKingsideFrom[us]]) &&
-    (origPosition.castling[us] & bitAtIndex[castlingKingFrom[us]])
+    (origPosition.castling & bitAtIndex[castlingRookKingsideFrom[us]]) &&
+    (origPosition.castling & bitAtIndex[castlingKingFrom[us]])
   )
   {
     newPosition = origPosition;
@@ -369,15 +369,15 @@ inline void generateCastlingMoves(
     newPosition.lastMove.lastMoved = KING;
     newPosition.lastMove.to = castlingKingKingsideTo[us];
     newPosition.lastMove.from = castlingKingFrom[us];
-    newPosition.castling[us] = 0;
+    newPosition.castling &= ~bitAtIndex[castlingKingFrom[us]];
     newPositions.array[newPositions.size] = newPosition;
     newPositions.size++;
   }
   //queenside
   if(
     !(occupancy & castlingQueensideOccupancyRelevant[us]) &&
-    (origPosition.castling[us] & bitAtIndex[castlingRookQueensideFrom[us]]) &&
-    (origPosition.castling[us] & bitAtIndex[castlingKingFrom[us]])
+    (origPosition.castling & bitAtIndex[castlingRookQueensideFrom[us]]) &&
+    (origPosition.castling & bitAtIndex[castlingKingFrom[us]])
   )
   {
     newPosition = origPosition;
@@ -393,7 +393,7 @@ inline void generateCastlingMoves(
     newPosition.lastMove.lastMoved = KING;
     newPosition.lastMove.to = castlingKingQueensideTo[us];
     newPosition.lastMove.from = castlingKingFrom[us];
-    newPosition.castling[us] = 0;
+    newPosition.castling &= ~bitAtIndex[castlingKingFrom[us]];
     newPositions.array[newPositions.size] = newPosition;
     newPositions.size++;
   }

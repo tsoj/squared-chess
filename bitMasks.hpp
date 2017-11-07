@@ -29,7 +29,7 @@ namespace BitMasks
   extern const std::array<std::array<Bitboard, 64>, 64> antiDiagonalAttackTable;
   extern const std::array<std::array<Bitboard, 64>, 64> diagonalAttackTable;
   extern const std::array<std::array<Bitboard, 64>, 64> fileAttackTable;
-  extern const std::array<std::array<Bitboard, 64>, 64> intAttackTable;
+  extern const std::array<std::array<Bitboard, 64>, 64> rankAttackTable;
   extern const std::array<Bitboard, 64> knightAttackTable;
   extern const std::array<Bitboard, 64> kingAttackTable;
 
@@ -46,6 +46,7 @@ namespace BitMasks
   extern const std::array<Bitboard, 2> castlingQueensideOccupancyRelevant;
 
   extern const std::array<PositionValue, 7> pieceValues;
+  extern const std::array<std::array<PositionValue, 8>, 2> rankValues;
 
   template<PIECE_TYPE Pt>
   Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex);

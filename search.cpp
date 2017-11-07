@@ -5,6 +5,9 @@
 #include <vector>
 #include <iostream>
 #include "moveOrdering.hpp"
+#include <chrono>
+
+int nodes;
 
 inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta, Move & killerMove, Move & nextkillerMove)
 {
@@ -12,6 +15,7 @@ inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosit
     {
       return evaluation(us, origPosition);
     }
+    nodes++;
     static PositionValue currentValue;
     static Move localKillerMove;
     PositionVector newPositions;
@@ -39,38 +43,46 @@ inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosit
 
 Position startSearch(Position origPosition, int depth)
 {
-    COLOR_TYPE us;
-    COLOR_TYPE enemy;
+  std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+  COLOR_TYPE us;
+  COLOR_TYPE enemy;
+  if(origPosition.whoIsToMove == WHITE_TO_MOVE)
+  {
+    us = WHITE;
+    enemy = BLACK;
+  }
+  else
+  {
+    us = BLACK;
+    enemy = WHITE;;
+  }
+  nodes = 0;
+  static Move localKillerMove;
+  static Move nextkillerMove;
+  PositionValue alpha = -POSITION_VALUE_INFINITY;
+  PositionValue beta = POSITION_VALUE_INFINITY;
+  PositionValue currentValue;
+  PositionVector newPositions;
+  int bestBoardIndex = 0;
+  generateAllMoves(us, enemy, origPosition, newPositions);
+  for(int i = 0; i < newPositions.size; i++)
+  {
+    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, localKillerMove, nextkillerMove);
+    if(alpha < currentValue)
+    {
+      alpha = currentValue;
+      bestBoardIndex = i;
+    }
+  }
 
-    if(origPosition.whoIsToMove == WHITE_TO_MOVE)
-    {
-      us = WHITE;
-      enemy = BLACK;
-    }
-    else
-    {
-      us = BLACK;
-      enemy = WHITE;;
-    }
+  printPosition(newPositions.array[bestBoardIndex]);
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  newPositions.array[bestBoardIndex].lastMove.print();
+  std::cout << "Evaluation: " << alpha << std::endl;
+  std::cout << "Time elapsed: " << timeElapsed << std::endl;
+  std::cout << "Nodes: " << nodes << std::endl;
+  std::cout << "Nodes/Second: " << nodes / (0.001 * timeElapsed) << std::endl;
 
-    static Move localKillerMove;
-    static Move nextkillerMove;
-    PositionValue alpha = -POSITION_VALUE_INFINITY;
-    PositionValue beta = POSITION_VALUE_INFINITY;
-    PositionValue currentValue;
-    PositionVector newPositions;
-    int bestBoardIndex = 0;
-    generateAllMoves(us, enemy, origPosition, newPositions);
-    for(int i = 0; i < newPositions.size; i++)
-    {
-      currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, localKillerMove, nextkillerMove);
-      if(alpha < currentValue)
-      {
-        alpha = currentValue;
-        bestBoardIndex = i;
-      }
-    }
-    printPosition(newPositions.array[bestBoardIndex]);
-    std::cout << "Evaluation: " << alpha << std::endl;
-    return newPositions.array[bestBoardIndex];
+  return newPositions.array[bestBoardIndex];
 }

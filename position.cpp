@@ -21,8 +21,7 @@ void Position::setToStartposition()
   pieces[QUEEN] = 0b0000100000000000000000000000000000000000000000000000000000001000;
   pieces[KING] = 0b0001000000000000000000000000000000000000000000000000000000010000;
   enPassant = 0b0;
-  castling[BLACK] = 0b1001000100000000000000000000000000000000000000000000000000000000;
-  castling[WHITE] = 0b0000000000000000000000000000000000000000000000000000000010010001;
+  castling = 0b1001000100000000000000000000000000000000000000000000000010010001;
   whoIsToMove = WHITE_TO_MOVE;
   numberHalfmovesPlayed = 0;
   lastMove.to = 0;
@@ -43,8 +42,7 @@ void Position::clearBoard()
   pieces[QUEEN] = 0b0;
   pieces[KING] = 0b00;
   enPassant = 0b0;
-  castling[WHITE] = 0b0;
-  castling[BLACK] = 0b0;
+  castling = 0b0;
   whoIsToMove = WHITE_TO_MOVE;
   numberHalfmovesPlayed = 0;
   lastMove.to = 0;
@@ -55,11 +53,11 @@ void Position::clearBoard()
 }
 
 
-int Position::getNumberHalfmovesPlayed()
+short Position::getNumberHalfmovesPlayed()
 {
   return numberHalfmovesPlayed;
 }
-int Position::getNumberMovesPlayed()
+short Position::getNumberMovesPlayed()
 {
   return numberHalfmovesPlayed / 2;
 }

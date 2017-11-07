@@ -64,7 +64,7 @@ namespace BitMasks
   std::array<PositionValue, 7> generatePieceValue()
   {
     std::array<PositionValue, 7>ret;
-    ret[KING] = 100000;
+    ret[KING] = 20000;
     ret[QUEEN] = 900;
     ret[ROOK] = 500;
     ret[BISHOP] = 300;
@@ -74,6 +74,28 @@ namespace BitMasks
     return ret;
   }
   const std::array<PositionValue, 7> pieceValues = generatePieceValue();
+  std::array<std::array<PositionValue, 8>, 2> generateRankValue()
+  {
+    std::array<std::array<PositionValue, 8>, 2> ret;
+    ret[0][WHITE] = 7;
+    ret[1][WHITE] = 6;
+    ret[2][WHITE] = 5;
+    ret[3][WHITE] = 4;
+    ret[4][WHITE] = 3;
+    ret[5][WHITE] = 2;
+    ret[6][WHITE] = 1;
+    ret[7][WHITE] = 0;
+    ret[0][BLACK] = 0;
+    ret[1][BLACK] = 1;
+    ret[2][BLACK] = 2;
+    ret[3][BLACK] = 3;
+    ret[4][BLACK] = 4;
+    ret[5][BLACK] = 5;
+    ret[6][BLACK] = 6;
+    ret[7][BLACK] = 7;
+    return ret;
+  }
+  const std::array<std::array<PositionValue, 8>, 2> rankValues = generateRankValue();
 
   Bitboard rankToFile(Bitboard rank)
   {

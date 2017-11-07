@@ -32,7 +32,7 @@ inline PositionValue evaluation(COLOR_TYPE us, Position position)
           ret -= pieceValues[i];
         }
         tempOccupancy &= ~bitAtIndex[fieldIndex];
-      } while(tempOccupancy);      
+      } while(tempOccupancy);
     }
   }
 
