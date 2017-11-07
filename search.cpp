@@ -11,34 +11,45 @@ int nodes;
 
 inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta, Move & killerMove, Move & nextkillerMove)
 {
-    if(depth<=0)
+  if(depth<=0)
+  {
+    return evaluation(us, origPosition);
+  }
+  nodes++;
+  static PositionValue currentValue;
+  static Move localKillerMove;
+  PositionVector newPositions;
+  generateAllMoves(us, enemy, origPosition, newPositions);
+  sortMoves(us, enemy, origPosition, newPositions, killerMove);
+  for(int i = 0; i < newPositions.size; i++)
+  {
+    if(isKingInCheck(us, enemy, newPositions.array[i]))
     {
-      return evaluation(us, origPosition);
+      continue;
     }
-    nodes++;
-    static PositionValue currentValue;
-    static Move localKillerMove;
-    PositionVector newPositions;
-    generateAllMoves(us, enemy, origPosition, newPositions);
-    sortMoves(us, enemy, origPosition, newPositions, killerMove);
-    for(int i = 0; i < newPositions.size; i++)
+    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, nextkillerMove, localKillerMove);
+    if(alpha < currentValue)
     {
-      if(isKingInCheck(us, enemy, newPositions.array[i]))
+      alpha = currentValue;
+      if(beta <= currentValue)
       {
-        continue;
-      }
-      currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, nextkillerMove, localKillerMove);
-      if(alpha < currentValue)
-      {
-        alpha = currentValue;
-        if(beta <= currentValue)
-        {
-          killerMove = newPositions.array[i].lastMove;
-          break;
-        }
+        killerMove = newPositions.array[i].lastMove;
+        break;
       }
     }
-    return alpha;
+  }
+  if(alpha == -POSITION_VALUE_INFINITY)
+  {
+    if(isKingInCheck(us, enemy, origPosition))
+    {
+      alpha += depth;
+    }
+    else
+    {
+      alpha = 0;      
+    }
+  }
+  return alpha;
 }
 
 Position startSearch(Position origPosition, int depth)
@@ -64,9 +75,15 @@ Position startSearch(Position origPosition, int depth)
   PositionValue currentValue;
   PositionVector newPositions;
   int bestBoardIndex = 0;
+  int numberLegalMoves = 0;
   generateAllMoves(us, enemy, origPosition, newPositions);
   for(int i = 0; i < newPositions.size; i++)
   {
+    if(isKingInCheck(us, enemy, newPositions.array[i]))
+    {
+      continue;
+    }
+    numberLegalMoves++;
     currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, localKillerMove, nextkillerMove);
     if(alpha < currentValue)
     {
@@ -74,10 +91,15 @@ Position startSearch(Position origPosition, int depth)
       bestBoardIndex = i;
     }
   }
-
-  printPosition(newPositions.array[bestBoardIndex]);
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  if(numberLegalMoves == 0)
+  {
+    std::cout << std::endl << "MATE" << std::endl << std::endl;
+  }
+  else{
+    printPosition(newPositions.array[bestBoardIndex]);
+  }
   newPositions.array[bestBoardIndex].lastMove.print();
   std::cout << "Evaluation: " << alpha << std::endl;
   std::cout << "Time elapsed: " << timeElapsed << std::endl;

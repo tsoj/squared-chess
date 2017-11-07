@@ -75,8 +75,11 @@ inline bool isKingInCheck(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const
 inline bool isKingInCheck(const COLOR_TYPE &  us, const COLOR_TYPE &  enemy, const Position & position)
 {
     unsigned long kingsIndex;
-    bitScanForward(kingsIndex, position.pieces[KING] & position.colors[us]);
-    return isKingInCheck(us, enemy, position, kingsIndex);
+    if(bitScanForward(kingsIndex, position.pieces[KING] & position.colors[us]))
+    {
+      return isKingInCheck(us, enemy, position, kingsIndex);
+    }
+    return false;
 }
 
 template<PIECE_TYPE Pt>
@@ -86,6 +89,7 @@ inline void applyQuietMove(
   const int & toFieldIndex, const int & fromFieldIndex
 )
 {
+  //std::cout << Pt<<std::endl;
   newPosition.lastMove.lastCaptured = NO_PIECE;
   newPosition.lastMove.promotedTo = NO_PIECE;
   newPosition.colors[us] = (newPosition.colors[us] & ~bitAtIndex[fromFieldIndex]) | bitAtIndex[toFieldIndex];
@@ -234,7 +238,6 @@ inline void generatePawnMoves(
   static unsigned long toFieldIndex;
   static Position newPosition;
   static int moveDirection;
-
   if(us == WHITE)
   {
     moveDirection = 8;
@@ -247,97 +250,98 @@ inline void generatePawnMoves(
     pawnDoubleMove = ranks[6];
     promotionMove = ranks[0];
   }
-
   pawnOccupancy = origPosition.pieces[PAWN] & origPosition.colors[us];
-
-  do
+  if(pawnOccupancy)
   {
-    bitScanForward(fromFieldIndex, pawnOccupancy);
-    toFieldIndex = fromFieldIndex + moveDirection;
-    if(!((origPosition.colors[BLACK] | origPosition.colors[WHITE]) & bitAtIndex[toFieldIndex]))
+    do
     {
-      newPosition = origPosition;
-      applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-      if(bitAtIndex[toFieldIndex] & promotionMove)
-      {
-        ADD_PROMOTION
-      }
-      newPositions.array[newPositions.size] = newPosition;
-      newPositions.size++;
-
-      toFieldIndex += moveDirection;
-      if(
-        !((origPosition.colors[BLACK] | origPosition.colors[WHITE]) & bitAtIndex[toFieldIndex]) &&
-        (bitAtIndex[fromFieldIndex] & pawnDoubleMove)
-      )
+      bitScanForward(fromFieldIndex, pawnOccupancy);
+      toFieldIndex = fromFieldIndex + moveDirection;
+      if(!((origPosition.colors[BLACK] | origPosition.colors[WHITE]) & bitAtIndex[toFieldIndex]))
       {
         newPosition = origPosition;
-        newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
         applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-      }
-    }
-    toFieldIndex = fromFieldIndex + moveDirection + EAST;
-    if(!(bitAtIndex[fromFieldIndex] & files[7]) && (origPosition.colors[enemy] | enPassant) & bitAtIndex[toFieldIndex])
-    {
-      if(enPassant & bitAtIndex[toFieldIndex])
-      {
-        newPosition = origPosition;
-        applyCaptureEnPassantMove(
-          us, enemy,
-          newPosition,
-          toFieldIndex,
-          fromFieldIndex,
-          enPassant,
-          moveDirection
-        );
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-      }
-      else
-      {
-        newPosition = origPosition;
-        applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
         if(bitAtIndex[toFieldIndex] & promotionMove)
         {
           ADD_PROMOTION
         }
         newPositions.array[newPositions.size] = newPosition;
         newPositions.size++;
-      }
-    }
-    toFieldIndex = fromFieldIndex + moveDirection + WEST;
-    if(!(bitAtIndex[fromFieldIndex] & files[0]) && (origPosition.colors[enemy] | enPassant) & bitAtIndex[toFieldIndex])
-    {
-      if(enPassant & bitAtIndex[toFieldIndex])
-      {
-        newPosition = origPosition;
-        applyCaptureEnPassantMove(
-          us, enemy,
-          newPosition,
-          toFieldIndex,
-          fromFieldIndex,
-          enPassant,
-          moveDirection
-        );
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
-      }
-      else
-      {
-        newPosition = origPosition;
-        applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-        if(bitAtIndex[toFieldIndex] & promotionMove)
+
+        toFieldIndex += moveDirection;
+        if(
+          !((origPosition.colors[BLACK] | origPosition.colors[WHITE]) & bitAtIndex[toFieldIndex]) &&
+          (bitAtIndex[fromFieldIndex] & pawnDoubleMove)
+        )
         {
-          ADD_PROMOTION
+          newPosition = origPosition;
+          newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
+          applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
+          newPositions.array[newPositions.size] = newPosition;
+          newPositions.size++;
         }
-        newPositions.array[newPositions.size] = newPosition;
-        newPositions.size++;
       }
-    }
-    pawnOccupancy &= ~bitAtIndex[fromFieldIndex];
-  } while(pawnOccupancy);
+      toFieldIndex = fromFieldIndex + moveDirection + EAST;
+      if(!(bitAtIndex[fromFieldIndex] & files[7]) && ((origPosition.colors[enemy] | enPassant) & bitAtIndex[toFieldIndex]))
+      {
+        if(enPassant & bitAtIndex[toFieldIndex])
+        {
+          newPosition = origPosition;
+          applyCaptureEnPassantMove(
+            us, enemy,
+            newPosition,
+            toFieldIndex,
+            fromFieldIndex,
+            enPassant,
+            moveDirection
+          );
+          newPositions.array[newPositions.size] = newPosition;
+          newPositions.size++;
+        }
+        else
+        {
+          newPosition = origPosition;
+          applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
+          if(bitAtIndex[toFieldIndex] & promotionMove)
+          {
+            ADD_PROMOTION
+          }
+          newPositions.array[newPositions.size] = newPosition;
+          newPositions.size++;
+        }
+      }
+      toFieldIndex = fromFieldIndex + moveDirection + WEST;
+      if(!(bitAtIndex[fromFieldIndex] & files[0]) && ((origPosition.colors[enemy] | enPassant) & bitAtIndex[toFieldIndex]))
+      {
+        if(enPassant & bitAtIndex[toFieldIndex])
+        {
+          newPosition = origPosition;
+          applyCaptureEnPassantMove(
+            us, enemy,
+            newPosition,
+            toFieldIndex,
+            fromFieldIndex,
+            enPassant,
+            moveDirection
+          );
+          newPositions.array[newPositions.size] = newPosition;
+          newPositions.size++;
+        }
+        else
+        {
+          newPosition = origPosition;
+          applyCaptureMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
+          if(bitAtIndex[toFieldIndex] & promotionMove)
+          {
+            ADD_PROMOTION
+          }
+          newPositions.array[newPositions.size] = newPosition;
+          newPositions.size++;
+        }
+      }
+      pawnOccupancy &= ~bitAtIndex[fromFieldIndex];
+    } while(pawnOccupancy);
+  }
 }
 
 

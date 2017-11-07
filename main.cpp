@@ -18,9 +18,10 @@ int main()
   //initStack();
   Position p;
   //p = setPositionFromFen("r3k2r/pp1nnp1p/2pqb1p1/3p4/3PP3/2NB1P2/PPQ1N1PP/R3K2R w KQkq - 0 0");
-  p = setPositionFromFen("r3k2r/pp2n2p/n1p3p1/2P2p2/2bNB3/P4P2/1P4PP/RN2K2R w KQkq -");
+  //p = setPositionFromFen("r3k2r/pp2n2p/n1p3p1/2P2p2/2bNB3/P4P2/1P4PP/RN2K2R w KQkq -");
+  p = setPositionFromFen("k7/2Q5/1K6/8/8/8/8/8 w - - 0 0");
   printPosition(p);
-  printPositionBitboards(p);
+  //printPositionBitboards(p);
   if(false)
   {
     PositionVector newPositions;
@@ -35,7 +36,7 @@ int main()
   }
   if(true)
   {
-    p = startSearch(p, 6);
+    p = startSearch(p, 2);
   }
   if(false)
   {
