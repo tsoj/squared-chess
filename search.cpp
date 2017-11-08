@@ -38,15 +38,16 @@ inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosit
       }
     }
   }
+  //check for MATE or STALEMATE
   if(alpha == -POSITION_VALUE_INFINITY)
   {
     if(isKingInCheck(us, enemy, origPosition))
     {
-      alpha += depth;
+      alpha -= depth;
     }
     else
     {
-      alpha = 0;      
+      alpha = 0;
     }
   }
   return alpha;
@@ -75,31 +76,21 @@ Position startSearch(Position origPosition, int depth)
   PositionValue currentValue;
   PositionVector newPositions;
   int bestBoardIndex = 0;
-  int numberLegalMoves = 0;
   generateAllMoves(us, enemy, origPosition, newPositions);
   for(int i = 0; i < newPositions.size; i++)
   {
-    if(isKingInCheck(us, enemy, newPositions.array[i]))
-    {
-      continue;
-    }
-    numberLegalMoves++;
     currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, localKillerMove, nextkillerMove);
     if(alpha < currentValue)
     {
       alpha = currentValue;
       bestBoardIndex = i;
     }
+    printPosition(newPositions.array[i]);
+    std::cout << "Value: " << currentValue << std::endl << std::endl;
   }
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  if(numberLegalMoves == 0)
-  {
-    std::cout << std::endl << "MATE" << std::endl << std::endl;
-  }
-  else{
-    printPosition(newPositions.array[bestBoardIndex]);
-  }
+  printPosition(newPositions.array[bestBoardIndex]);
   newPositions.array[bestBoardIndex].lastMove.print();
   std::cout << "Evaluation: " << alpha << std::endl;
   std::cout << "Time elapsed: " << timeElapsed << std::endl;

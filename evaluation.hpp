@@ -16,7 +16,7 @@ inline PositionValue evaluation(COLOR_TYPE us, Position position)
   static unsigned long fieldIndex;
   static Bitboard tempOccupancy;
 
-  for(int i = 0; i<NO_PIECE; i++)
+  for(int i = QUEEN; i<NO_PIECE; i++)
   {
     if(position.pieces[i])
     {

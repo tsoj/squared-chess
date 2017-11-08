@@ -36,7 +36,7 @@ int main()
   }
   if(true)
   {
-    p = startSearch(p, 2);
+    p = startSearch(p, 4);
   }
   if(false)
   {
