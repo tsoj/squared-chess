@@ -11,7 +11,7 @@ inline void generateAllMoves(
   const COLOR_TYPE & us,
   const COLOR_TYPE & enemy,
   Position origPosition,
-  PositionVector & newPositions
+  PositionList & newPositions
 )
 {
   static Bitboard enPassant;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "bitMasks.hpp"
+#include "data.hpp"
 #include "bitOperations.hpp"
 #include "utils.hpp"
 #include <vector>
 
 using namespace BitOperations;
-using namespace BitMasks;
+using namespace Data;
 
 
 inline bool isKingInCheck(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Position & position, int kingsIndex)
@@ -148,7 +148,7 @@ inline void generateMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
   const Bitboard & occupancy,
-  PositionVector & newPositions
+  PositionList & newPositions
 )
 {
   static Bitboard pieceOccupancy;
@@ -174,7 +174,7 @@ inline void generateMoves(
           bitScanForward(toFieldIndex, quietAttackMask);
           newPosition = origPosition;
           applyQuietMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
           quietAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(quietAttackMask);
@@ -186,7 +186,7 @@ inline void generateMoves(
           bitScanForward(toFieldIndex, captureAttackMask);
           newPosition = origPosition;
           applyCaptureMove<Pt>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
           captureAttackMask &= ~bitAtIndex[toFieldIndex];
         } while(captureAttackMask);
@@ -203,21 +203,21 @@ newPosition.pieces[PAWN] = newPosition.pieces[PAWN] & ~bitAtIndex[toFieldIndex];
 newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] | bitAtIndex[toFieldIndex];\
 newPosition.lastMove.lastMoved = KNIGHT;\
 newPosition.lastMove.promotedTo = KNIGHT;\
-newPositions.array[newPositions.size] = newPosition;\
+newPositions[newPositions.size] = newPosition;\
 newPositions.size++;\
 newPosition.pieces[KNIGHT] = newPosition.pieces[KNIGHT] &  ~bitAtIndex[toFieldIndex];\
 \
 newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] | bitAtIndex[toFieldIndex];\
 newPosition.lastMove.lastMoved = BISHOP;\
 newPosition.lastMove.promotedTo = BISHOP;\
-newPositions.array[newPositions.size] = newPosition;\
+newPositions[newPositions.size] = newPosition;\
 newPositions.size++;\
 newPosition.pieces[BISHOP] = newPosition.pieces[BISHOP] &  ~bitAtIndex[toFieldIndex];\
 \
 newPosition.pieces[ROOK] = newPosition.pieces[ROOK] | bitAtIndex[toFieldIndex];\
 newPosition.lastMove.lastMoved = ROOK;\
 newPosition.lastMove.promotedTo = ROOK;\
-newPositions.array[newPositions.size] = newPosition;\
+newPositions[newPositions.size] = newPosition;\
 newPositions.size++;\
 newPosition.pieces[ROOK] = newPosition.pieces[ROOK] &  ~bitAtIndex[toFieldIndex];\
 \
@@ -227,7 +227,7 @@ newPosition.lastMove.promotedTo = QUEEN;
 inline void generatePawnMoves(
   const COLOR_TYPE & us, const COLOR_TYPE & enemy,
   const Position & origPosition,
-  PositionVector & newPositions,
+  PositionList & newPositions,
   const Bitboard & enPassant
 )
 {
@@ -265,7 +265,7 @@ inline void generatePawnMoves(
         {
           ADD_PROMOTION
         }
-        newPositions.array[newPositions.size] = newPosition;
+        newPositions[newPositions.size] = newPosition;
         newPositions.size++;
 
         toFieldIndex += moveDirection;
@@ -277,7 +277,7 @@ inline void generatePawnMoves(
           newPosition = origPosition;
           newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
           applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
         }
       }
@@ -295,7 +295,7 @@ inline void generatePawnMoves(
             enPassant,
             moveDirection
           );
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
         }
         else
@@ -306,7 +306,7 @@ inline void generatePawnMoves(
           {
             ADD_PROMOTION
           }
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
         }
       }
@@ -324,7 +324,7 @@ inline void generatePawnMoves(
             enPassant,
             moveDirection
           );
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
         }
         else
@@ -335,7 +335,7 @@ inline void generatePawnMoves(
           {
             ADD_PROMOTION
           }
-          newPositions.array[newPositions.size] = newPosition;
+          newPositions[newPositions.size] = newPosition;
           newPositions.size++;
         }
       }
@@ -348,7 +348,7 @@ inline void generatePawnMoves(
 inline void generateCastlingMoves(
     const COLOR_TYPE & us, const COLOR_TYPE & enemy,
     const Position & origPosition,
-    PositionVector & newPositions,
+    PositionList & newPositions,
     const Bitboard & occupancy
 )
 {
@@ -374,7 +374,7 @@ inline void generateCastlingMoves(
     newPosition.lastMove.to = castlingKingKingsideTo[us];
     newPosition.lastMove.from = castlingKingFrom[us];
     newPosition.castling &= ~bitAtIndex[castlingKingFrom[us]];
-    newPositions.array[newPositions.size] = newPosition;
+    newPositions[newPositions.size] = newPosition;
     newPositions.size++;
   }
   //queenside
@@ -398,7 +398,7 @@ inline void generateCastlingMoves(
     newPosition.lastMove.to = castlingKingQueensideTo[us];
     newPosition.lastMove.from = castlingKingFrom[us];
     newPosition.castling &= ~bitAtIndex[castlingKingFrom[us]];
-    newPositions.array[newPositions.size] = newPosition;
+    newPositions[newPositions.size] = newPosition;
     newPositions.size++;
   }
 }

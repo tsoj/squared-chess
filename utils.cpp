@@ -1,10 +1,10 @@
 #include <iostream>
 #include <array>
 #include "utils.hpp"
-#include "bitMasks.hpp"
+#include "data.hpp"
 #include <string>
 #include <sstream>
-using namespace BitMasks;
+using namespace Data;
 
 #define horizontalLineSymbol "\u2501" //http://www.fileformat.info/info/unicode/category/So/list.htm
 #define verticalLineSymbol "\u2503"

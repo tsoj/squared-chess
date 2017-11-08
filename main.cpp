@@ -5,14 +5,14 @@
 #include "position.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-#include "bitMasks.hpp"
+#include "data.hpp"
 #include "text.hpp"
 #include "movegen.hpp"
 #include "evaluation.hpp"
 #include "search.hpp"
 #include "moveOrdering.hpp"
 
-using namespace BitMasks;
+using namespace Data;
 int main()
 {
   //initStack();
@@ -24,14 +24,14 @@ int main()
   //printPositionBitboards(p);
   if(false)
   {
-    PositionVector newPositions;
+    PositionList newPositions;
     newPositions.size = 0;
     generateAllMoves(WHITE, BLACK, p, newPositions);
     for(int i = 0; i<newPositions.size; i++)
     {
-      printPosition(newPositions.array[i]);
-      newPositions.array[i].lastMove.print();
-      printPositionBitboards(newPositions.array[i]);
+      printPosition(newPositions[i]);
+      newPositions[i].lastMove.print();
+      printPositionBitboards(newPositions[i]);
     }
   }
   if(true)

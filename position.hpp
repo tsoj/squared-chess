@@ -3,6 +3,10 @@
 #include "types.hpp"
 #include <array>
 #include <iostream>
+#include "data.hpp"
+
+using namespace Data;
+
 
 class Move
 {
@@ -42,7 +46,7 @@ public:
   short whoIsToMove; //1 for white, -1 for black to move
   short numberHalfmovesPlayed; //1 for white, -1 for black to move
   Move lastMove;
-  PositionValue positionValue;
+  Score score;
 
   void setToStartposition();
   void clearBoard();
@@ -54,17 +58,20 @@ public:
   //void printAllBitboards();
   void printPosition();
 
-  static bool cmpValue(const Position &a, const Position &b)
+  static bool cmpScore(const Position &a, const Position &b)
   {
-    return a.positionValue > b.positionValue;
+    return a.score > b.score;
   }
 };
 
-
 #define MAX_NUMBER_MOVES_PER_POSITION 128
-class Position;
-struct PositionVector
+struct PositionList
 {
-  std::array<Position, MAX_NUMBER_MOVES_PER_POSITION> array;
+  inline Position & operator[](int Index)
+  {
+    return array[Index];
+  }
   int size;
+private:
+  std::array<Position, MAX_NUMBER_MOVES_PER_POSITION> array;
 };

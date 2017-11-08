@@ -50,5 +50,5 @@ enum COLOR_TYPE {WHITE, BLACK, NO_COLOR};
 #define SOUTH_WEST -9
 #define SOUTH_EAST -7
 
-typedef int PositionValue;
-#define POSITION_VALUE_INFINITY 30000
+typedef int Score;
+#define SCORE_INFINITY 30000

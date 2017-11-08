@@ -2,15 +2,15 @@
 
 #include "types.hpp"
 #include "position.hpp"
-#include "bitMasks.hpp"
+#include "data.hpp"
 #include "bitOperations.hpp"
 
-using namespace BitMasks;
+using namespace Data;
 using namespace BitOperations;
 
-inline PositionValue evaluation(COLOR_TYPE us, Position position)
+inline Score evaluation(COLOR_TYPE us, Position position)
 {
-  static PositionValue ret;
+  static Score ret;
   ret = 0;
 
   static unsigned long fieldIndex;

@@ -1,6 +1,6 @@
 #include "position.hpp"
-#include "bitMasks.hpp"
-using namespace BitMasks;
+#include "data.hpp"
+using namespace Data;
 //0b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
 Position::Position()
 {

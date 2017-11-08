@@ -1,4 +1,4 @@
-#include "bitMasks.hpp"
+#include "data.hpp"
 #include <iostream>
 #include <bitset>
 #include "utils.hpp"
@@ -9,7 +9,7 @@
 #define LOWER_LEFT_SIDE_ZERO 0b1111111011111100111110001111000011100000110000001000000000000000
 #define UPPER_RIGHT_SIDE_ZERO 0b0000000000000001000000110000011100001111000111110011111101111111
 
-namespace BitMasks
+namespace Data
 {
   std::array<Bitboard, 64> generateBitAtIndex();
   std::array<Bitboard, 8> generateRanks();
@@ -61,9 +61,9 @@ namespace BitMasks
   const std::array<Bitboard, 64> knightAttackTable = generateKnightAttackTable();
   const std::array<Bitboard, 64> kingAttackTable = generateKingAttackTable();
 
-  std::array<PositionValue, 7> generatePieceValue()
+  std::array<Score, 7> generatePieceValue()
   {
-    std::array<PositionValue, 7>ret;
+    std::array<Score, 7>ret;
     ret[KING] = 20000;
     ret[QUEEN] = 900;
     ret[ROOK] = 500;
@@ -73,10 +73,10 @@ namespace BitMasks
     ret[NO_PIECE] = 0;
     return ret;
   }
-  const std::array<PositionValue, 7> pieceValues = generatePieceValue();
-  std::array<std::array<PositionValue, 8>, 2> generateRankValue()
+  const std::array<Score, 7> pieceValues = generatePieceValue();
+  std::array<std::array<Score, 8>, 2> generateRankValue()
   {
-    std::array<std::array<PositionValue, 8>, 2> ret;
+    std::array<std::array<Score, 8>, 2> ret;
     ret[0][WHITE] = 7;
     ret[1][WHITE] = 6;
     ret[2][WHITE] = 5;
@@ -95,7 +95,15 @@ namespace BitMasks
     ret[7][BLACK] = 7;
     return ret;
   }
-  const std::array<std::array<PositionValue, 8>, 2> rankValues = generateRankValue();
+  const std::array<std::array<Score, 8>, 2> rankValues = generateRankValue();
+  std::array<int, 2> generatePawnMoveDirections()
+  {
+    std::array<int, 2> ret;
+    ret[WHITE] = 8;
+    ret[BLACK] = -8;
+    return ret;
+  }
+  const std::array<int, 2> pawnMoveDirections = generatePawnMoveDirections();
 
   Bitboard rankToFile(Bitboard rank)
   {

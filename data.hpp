@@ -6,7 +6,7 @@
 #define MAIN_DIAGONAL 0b1000000001000000001000000001000000001000000001000000001000000001 //A1 to H8
 #define ANTI_DIAGONAL 0b0000000100000010000001000000100000010000001000000100000010000000 //H1 to A8
 
-namespace BitMasks
+namespace Data
 {
   Bitboard rankToFile(Bitboard rank);
 
@@ -45,8 +45,9 @@ namespace BitMasks
   extern const std::array<Bitboard, 2> castlingKingsideOccupancyRelevant;
   extern const std::array<Bitboard, 2> castlingQueensideOccupancyRelevant;
 
-  extern const std::array<PositionValue, 7> pieceValues;
-  extern const std::array<std::array<PositionValue, 8>, 2> rankValues;
+  extern const std::array<Score, 7> pieceValues;
+  extern const std::array<std::array<Score, 8>, 2> rankValues;
+  extern const std::array<int, 2> pawnMoveDirections;
 
   template<PIECE_TYPE Pt>
   Bitboard getAttackBitboard(Bitboard occupancy, int boardIndex);
