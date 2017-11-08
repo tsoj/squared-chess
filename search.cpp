@@ -6,10 +6,12 @@
 #include <iostream>
 #include "moveOrdering.hpp"
 #include <chrono>
+#define MAX_DEPTH 64
 
 int nodes;
+Move killerMove[MAX_DEPTH][2];
 
-inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta, Move & killerMove, Move & nextkillerMove)
+inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, PositionValue alpha, PositionValue beta)
 {
   if(depth<=0)
   {
@@ -20,20 +22,21 @@ inline PositionValue negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosit
   static Move localKillerMove;
   PositionVector newPositions;
   generateAllMoves(us, enemy, origPosition, newPositions);
-  sortMoves(us, enemy, origPosition, newPositions, killerMove);
+  sortMoves(us, enemy, origPosition, newPositions, killerMove[depth]);
   for(int i = 0; i < newPositions.size; i++)
   {
     if(isKingInCheck(us, enemy, newPositions.array[i]))
     {
       continue;
     }
-    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, nextkillerMove, localKillerMove);
+    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha);
     if(alpha < currentValue)
     {
       alpha = currentValue;
       if(beta <= currentValue)
       {
-        killerMove = newPositions.array[i].lastMove;
+        killerMove[depth][1] = killerMove[depth][0];
+        killerMove[depth][0] = newPositions.array[i].lastMove;
         break;
       }
     }
@@ -77,9 +80,10 @@ Position startSearch(Position origPosition, int depth)
   PositionVector newPositions;
   int bestBoardIndex = 0;
   generateAllMoves(us, enemy, origPosition, newPositions);
+  sortMoves(us, enemy, origPosition, newPositions, killerMove[depth]);
   for(int i = 0; i < newPositions.size; i++)
   {
-    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha, localKillerMove, nextkillerMove);
+    currentValue = -negaMax(enemy, us, newPositions.array[i], depth - 1, -beta, -alpha);
     if(alpha < currentValue)
     {
       alpha = currentValue;
