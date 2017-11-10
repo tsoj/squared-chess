@@ -16,8 +16,12 @@ using namespace Data;
 int main()
 {
   //initStack();
+  std::string input;
+  getline(std::cin, input);
   Position p;
-  p = setPositionFromFen("r3k2r/pp1nnp1p/2pqb1p1/3p4/3PP3/2NB1P2/PPQ1N1PP/R3K2R w KQkq - 0 0");
+  p = setPositionFromFen(input);
+  //p = setPositionFromFen("5r1k/1p1b1p1p/p2ppb2/5P1B/1q6/1Pr3R1/2PQ2PP/5R1K w - - 0 1");
+  //p = setPositionFromFen("1k6/8/K7/8/8/8/Q7/8 w - -");
   //p = setPositionFromFen("r3k2r/pp2n2p/n1p3p1/2P2p2/2bNB3/P4P2/1P4PP/RN2K2R w KQkq -");
   //p = setPositionFromFen("k7/2Q5/1K6/8/8/8/8/8 w - - 0 0");
   printPosition(p);
@@ -34,9 +38,10 @@ int main()
       printPositionBitboards(newPositions[i]);
     }
   }
-  if(true)
+  while(true)
   {
-    p = startSearch(p, 6);
+    getline(std::cin, input);
+    p = startSearch(p, 8);
   }
   if(false)
   {

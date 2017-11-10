@@ -52,3 +52,4 @@ enum COLOR_TYPE {WHITE, BLACK, NO_COLOR};
 
 typedef int Score;
 #define SCORE_INFINITY 30000
+#define SCORE_MATE 20000

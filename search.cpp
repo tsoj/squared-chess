@@ -18,8 +18,8 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
     return evaluation(us, origPosition);
   }
   nodes++;
-  static Score currentValue;
-  static Move localKillerMove;
+  Score currentScore;
+  int numberLegalMoves = 0;
   PositionList newPositions;
   generateAllMoves(us, enemy, origPosition, newPositions);
   sortMoves(us, enemy, origPosition, newPositions, killerMove[depth]);
@@ -29,11 +29,12 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
     {
       continue;
     }
-    currentValue = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
-    if(alpha < currentValue)
+    numberLegalMoves++;
+    currentScore = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+    if(alpha < currentScore)
     {
-      alpha = currentValue;
-      if(beta <= currentValue)
+      alpha = currentScore;
+      if(beta <= currentScore)
       {
         killerMove[depth][1] = killerMove[depth][0];
         killerMove[depth][0] = newPositions[i].lastMove;
@@ -42,11 +43,11 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
     }
   }
   //check for MATE or STALEMATE
-  if(alpha == -SCORE_INFINITY)
+  if(numberLegalMoves == 0)
   {
     if(isKingInCheck(us, enemy, origPosition))
     {
-      alpha -= depth;
+      alpha = -SCORE_MATE-depth;
     }
     else
     {
@@ -72,31 +73,52 @@ Position startSearch(Position origPosition, int depth)
     enemy = WHITE;;
   }
   nodes = 0;
-  static Move localKillerMove;
-  static Move nextkillerMove;
+  int numberLegalMoves = 0;
   Score alpha = -SCORE_INFINITY;
   Score beta = SCORE_INFINITY;
-  Score currentValue;
+  Score currentScore;
   PositionList newPositions;
   int bestBoardIndex = 0;
   generateAllMoves(us, enemy, origPosition, newPositions);
   sortMoves(us, enemy, origPosition, newPositions, killerMove[depth]);
   for(int i = 0; i < newPositions.size; i++)
   {
-    currentValue = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
-    if(alpha < currentValue)
+    if(isKingInCheck(us, enemy, newPositions[i]))
     {
-      alpha = currentValue;
+      continue;
+    }
+    numberLegalMoves++;
+    currentScore = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+    if(alpha < currentScore)
+    {
+      alpha = currentScore;
       bestBoardIndex = i;
     }
-    printPosition(newPositions[i]);
-    std::cout << "Value: " << currentValue << std::endl << std::endl;
   }
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  printPosition(newPositions[bestBoardIndex]);
+  if(numberLegalMoves == 0)
+  {
+    std::cout << std::endl << std::endl << "MATE" << std::endl << std::endl;
+  }
+  else
+  {
+    printPosition(newPositions[bestBoardIndex]);
+  }
   newPositions[bestBoardIndex].lastMove.print();
-  std::cout << "Score: " << alpha << std::endl;
+  std::cout << "Score: ";
+  if(alpha >= SCORE_MATE)
+  {
+    std::cout << "Mating in " << (depth - (alpha - SCORE_MATE))/2 << std::endl;
+  }
+  else if (alpha <= -SCORE_MATE)
+  {
+    std::cout << "Mated in " << (depth - (-alpha - SCORE_MATE))/2 << std::endl;
+  }
+  else
+  {
+    std::cout << alpha << std::endl;
+  }
   std::cout << "Time elapsed: " << timeElapsed << std::endl;
   std::cout << "Nodes: " << nodes << std::endl;
   std::cout << "Nodes/Second: " << nodes / (0.001 * timeElapsed) << std::endl;
