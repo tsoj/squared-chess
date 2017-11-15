@@ -275,7 +275,7 @@ inline void generatePawnMoves(
         )
         {
           newPosition = origPosition;
-          newPosition.enPassant = bitAtIndex[fromFieldIndex - moveDirection];
+          newPosition.enPassant = bitAtIndex[fromFieldIndex + moveDirection];
           applyQuietMove<PAWN>(us, enemy, newPosition, toFieldIndex, fromFieldIndex);
           newPositions[newPositions.size] = newPosition;
           newPositions.size++;

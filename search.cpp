@@ -8,6 +8,21 @@
 #include <chrono>
 #define MAX_DEPTH 64
 
+int Perft(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth)
+{
+    int nodes = 0;
+
+    if (depth == 0) return 1;
+
+    PositionList newPositions;
+    generateAllMoves(us, enemy, origPosition, newPositions);
+    for (int i = 0; i < newPositions.size; i++) {
+        if (!isKingInCheck(us, enemy, newPositions[i]))
+            nodes += Perft(enemy, us, newPositions[i], depth - 1);
+    }
+    return nodes;
+}
+
 int nodes;
 Move killerMove[MAX_DEPTH][2];
 
@@ -15,7 +30,7 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
 {
   if(depth<=0)
   {
-    return evaluation(us, origPosition);
+    return evaluation(us, enemy, origPosition);
   }
   nodes++;
   Score currentScore;
@@ -94,12 +109,14 @@ Position startSearch(Position origPosition, int depth)
       alpha = currentScore;
       bestBoardIndex = i;
     }
+    //printPosition(newPositions[i]);
+    //std::cout << "Score: " << currentScore << std::endl;
   }
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   if(numberLegalMoves == 0)
   {
-    std::cout << std::endl << std::endl << "MATE" << std::endl << std::endl;
+    std::cout << std::endl << std::endl << "NO LEGAL MOVES" << std::endl << std::endl;
   }
   else
   {
@@ -121,7 +138,7 @@ Position startSearch(Position origPosition, int depth)
   }
   std::cout << "Time elapsed: " << timeElapsed << std::endl;
   std::cout << "Nodes: " << nodes << std::endl;
-  std::cout << "Nodes/Second: " << nodes / (0.001 * timeElapsed) << std::endl;
+  std::cout << "Nodes/Second: " << (int)(nodes / (0.001 * timeElapsed)) << std::endl;
 
   return newPositions[bestBoardIndex];
 }

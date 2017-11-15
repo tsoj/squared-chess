@@ -34,6 +34,18 @@ public:
   PIECE_TYPE promotedTo;
 };
 
+#define MAX_NUMBER_MOVES_PER_POSITION 128
+struct MoveList
+{
+  inline Move & operator[](int Index)
+  {
+    return array[Index];
+  }
+  int size;
+private:
+  std::array<Move, MAX_NUMBER_MOVES_PER_POSITION> array;
+};
+
 class Position
 {
 public:

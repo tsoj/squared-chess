@@ -29,6 +29,10 @@ inline void sortMoves(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Pos
       newPositions[i].score += 100;
     }
     newPositions[i].score += pieceValues[newPositions[i].lastMove.promotedTo]*10;
+    if(newPositions[i].lastMove.lastMoved == PAWN)
+    {
+      newPositions[i].score+=-1;
+    }
   }
   std::sort(&newPositions[0], &newPositions[newPositions.size], Position::cmpScore);
 
