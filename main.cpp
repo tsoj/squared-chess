@@ -10,6 +10,7 @@
 #include "evaluation.hpp"
 #include "search.hpp"
 #include "moveOrdering.hpp"
+#include "zobrist.hpp"
 
 using namespace Data;
 int main()
@@ -19,12 +20,12 @@ int main()
   /*std::cout << "Enter FEN. > ";
   getline(std::cin, input);
   p = setPositionFromFen(input);*/
-  //p = setPositionFromFen("5r1k/1p1b1p1p/p2ppb2/5P1B/1q6/1Pr3R1/2PQ2PP/5R1K w - - 0 1");
+  p = setPositionFromFen("5r1k/1p1b1p1p/p2ppb2/5P1B/1q6/1Pr3R1/2PQ2PP/5R1K w - - 0 1");//CHECKMATE
   //p = setPositionFromFen("1k6/8/K7/8/8/8/Q7/8 w - -");
   //p = setPositionFromFen("r3k2r/pp2n2p/n1p3p1/2P2p2/2bNB3/P4P2/1P4PP/RN2K2R w KQkq -");
-  //p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+  //p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");//TEST
   //p = setPositionFromFen("k7/2Q5/1K6/8/8/8/8/8 w - - 0 0");
-  p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+  //p = setPositionFromFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
   printPosition(p);
   //printPositionBitboards(p);
   if(false)
@@ -48,6 +49,10 @@ int main()
       printPosition(newPositions[i]);
       //newPositions[i].lastMove.print();
       //printPositionBitboards(newPositions[i]);
+      if(true)
+      {
+        std::cout << getZobristKey(newPositions[i]) << std::endl;
+      }
     }
   }
   while(true)

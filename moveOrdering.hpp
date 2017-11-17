@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "data.hpp"
 #include "utils.hpp"
+#include "zobrist.hpp"
 #include <iostream>
 
 using namespace Data;
@@ -10,7 +11,6 @@ inline void sortMoves(const COLOR_TYPE & us, const COLOR_TYPE & enemy, const Pos
 {
   for(int i = 0; i<newPositions.size; i++)
   {
-
     newPositions[i].score = 0;
     if(newPositions[i].lastMove.lastCaptured != NO_PIECE)
     {

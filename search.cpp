@@ -6,7 +6,16 @@
 #include <iostream>
 #include "moveOrdering.hpp"
 #include <chrono>
+#include "zobrist.hpp"
 #define MAX_DEPTH 64
+#define TP_TABLE_SIZE 10000000
+
+struct TranspositionTableContent
+{
+  Bitboard zobristKey;
+  int searchedDepth;
+  Score searchedScore;
+};
 
 int Perft(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth)
 {
@@ -23,8 +32,19 @@ int Perft(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth)
     return nodes;
 }
 
+void initTranspositionTable(TranspositionTableContent ret[TP_TABLE_SIZE])
+{
+  for (int i = 0; i < TP_TABLE_SIZE; i++)
+  {
+    ret[i].zobristKey = 0;
+    ret[i].searchedDepth = -1;
+    ret[i].searchedScore = 0;
+  }
+}
+
 int nodes;
 Move killerMove[MAX_DEPTH][2];
+TranspositionTableContent tpTable[TP_TABLE_SIZE];
 
 inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int depth, Score alpha, Score beta)
 {
@@ -34,6 +54,7 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
   }
   nodes++;
   Score currentScore;
+  Bitboard currentZobristKey;
   int numberLegalMoves = 0;
   PositionList newPositions;
   generateAllMoves(us, enemy, origPosition, newPositions);
@@ -45,7 +66,21 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
       continue;
     }
     numberLegalMoves++;
-    currentScore = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+    currentZobristKey = getZobristKey(newPositions[i]);
+
+    if((tpTable[currentZobristKey%TP_TABLE_SIZE].zobristKey == currentZobristKey) && (tpTable[currentZobristKey%TP_TABLE_SIZE].searchedDepth >= depth))
+    {
+      currentScore = tpTable[currentZobristKey%TP_TABLE_SIZE].searchedScore;
+    }
+    else
+    {
+      currentScore = -negaMax(enemy, us, newPositions[i], depth - 1, -beta, -alpha);
+      tpTable[currentZobristKey%TP_TABLE_SIZE].zobristKey = currentZobristKey;
+      tpTable[currentZobristKey%TP_TABLE_SIZE].searchedDepth = depth;
+      tpTable[currentZobristKey%TP_TABLE_SIZE].searchedScore = currentScore;
+    }
+
+
     if(alpha < currentScore)
     {
       alpha = currentScore;
@@ -74,6 +109,7 @@ inline Score negaMax(COLOR_TYPE us, COLOR_TYPE enemy, Position origPosition, int
 
 Position startSearch(Position origPosition, int depth)
 {
+  initTranspositionTable(tpTable);
   std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
   COLOR_TYPE us;
   COLOR_TYPE enemy;
