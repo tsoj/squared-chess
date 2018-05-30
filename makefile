@@ -4,11 +4,12 @@ LDFLAGS = -std=c++14 -O3
 NAME = ^2-chess
 BIN_FILE_PATH = ./bin/
 
-CPP = main.cpp data.cpp utils.cpp position.cpp search.cpp zobrist.cpp
+CPP = main.cpp
 OBJ = $(CPP:%.cpp=%.o)
 OBJ_DEST = $(CPP:%.cpp=$(BIN_FILE_PATH)%.o)
 
 all: $(OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o build build.cpp && ./build && rm ./build
 	$(CC) -o $(BIN_FILE_PATH)$(NAME) $(OBJ_DEST) $(LDFLAGS)
 
 test: all
