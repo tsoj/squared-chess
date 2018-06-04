@@ -1,4 +1,5 @@
 #include <iostream>
+#include "chessData.hpp"
 
 int main()
 {

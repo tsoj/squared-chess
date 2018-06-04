@@ -1,8 +1,17 @@
 #pragma once
 
-#include "types.hpp"
+#include <cstdint>
 
-namespace BitOperations
+#if defined(__GNUC__) || defined(__clang__)
+  #ifdef __i386
+    #define ARCH_X86
+  #endif
+  #ifdef __amd64
+    #define ARCH_X86_64
+  #endif
+#endif
+
+namespace CountZeros
 {
   inline int trailingZeros(uint64_t mask);
   inline int leadingZeros(uint64_t mask);
@@ -33,6 +42,4 @@ namespace BitOperations
       }
     #endif
   #endif
-
-
 }

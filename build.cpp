@@ -1,9 +1,18 @@
-#include "types.hpp"
-#include "bitOperations.hpp"
+#include "countZeros.hpp"
 
+#include <cstdint>
 #include <fstream>
 #include <string>
 #include <iostream>
+
+#define NORTH 8
+#define SOUTH -8
+#define EAST 1
+#define WEST -1
+#define NORTH_EAST 9
+#define NORTH_WEST 7
+#define SOUTH_WEST -9
+#define SOUTH_EAST -7
 
 const uint64_t UPPER_LEFT_SIDE_ZERO =  0b1000000011000000111000001111000011111000111111001111111011111111;
 const uint64_t LOWER_RIGHT_SIDE_ZERO = 0b1111111101111111001111110001111100001111000001110000001100000001;
@@ -65,8 +74,8 @@ std::string arrayToString(uint64_t a[size])
   std::string ret = "{";
   for(size_t i = 0; i< size; i++)
   {
-    ret.append("(uint64_t)");
     ret.append(std::to_string(a[i]));
+    ret.append("U");
     if(i<size-1)
     {
       ret.append(", ");
@@ -159,7 +168,7 @@ int main()
     uint64_t tmp = currentDiagonal;
     while(tmp!=0)
     {
-      size_t index = BitOperations::trailingZeros(tmp);
+      size_t index = CountZeros::trailingZeros(tmp);
       diagonals64[index] = currentDiagonal;
       tmp = tmp & (~bitAtIndex[index]);
     }
@@ -170,7 +179,7 @@ int main()
     uint64_t tmp = currentDiagonal;
     while(tmp!=0)
     {
-      size_t index = BitOperations::trailingZeros(tmp);
+      size_t index = CountZeros::trailingZeros(tmp);
       diagonals64[index] = currentDiagonal;
       tmp = tmp & ~bitAtIndex[index];
     }
@@ -184,7 +193,7 @@ int main()
     uint64_t tmp = currentAntiDiagonal;
     while(tmp!=0)
     {
-      size_t index = BitOperations::trailingZeros(tmp);
+      size_t index = CountZeros::trailingZeros(tmp);
       antiDiagonals64[index] = currentAntiDiagonal;
       tmp = tmp & ~bitAtIndex[index];
     }
@@ -194,7 +203,7 @@ int main()
     uint64_t tmp = currentAntiDiagonal;
     while(tmp!=0)
     {
-      size_t index = BitOperations::trailingZeros(tmp);
+      size_t index = CountZeros::trailingZeros(tmp);
       antiDiagonals64[index] = currentAntiDiagonal;
       tmp = tmp & ~bitAtIndex[index];
     }
@@ -205,7 +214,7 @@ int main()
     uint64_t tmp = currentAntiDiagonal;
     while(tmp!=0)
     {
-      size_t index = BitOperations::trailingZeros(tmp);
+      size_t index = CountZeros::trailingZeros(tmp);
       antiDiagonals64[index] = currentAntiDiagonal;
       tmp = tmp & ~bitAtIndex[index];
     }
@@ -448,232 +457,156 @@ int main()
   }
   stringToFile("./chessData/rankAttackTable.in", arrayOfArrayToString<64, 64>(rankAttackTable));
 
-
-  /*
-
-    let mut knight_attack_table: [u64; 64] = [0; 64];
-    for k in 0..knight_attack_table.len()
-    {
-        let i = k as isize;
-        knight_attack_table[i as usize] = 0;
-        if i + NORTH + NORTH_WEST <= 63 && i % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + NORTH + NORTH_WEST) as usize];
-        }
-        if i + NORTH + NORTH_EAST <= 63 && (i + 1) % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + NORTH + NORTH_EAST) as usize];
-        }
-        if i + NORTH_WEST + WEST <= 63 && i % 8 > 1
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + NORTH_WEST + WEST) as usize];
-        }
-        if i + NORTH_EAST + EAST <= 63 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + NORTH_EAST + EAST) as usize];
-        }
-        if i + SOUTH + SOUTH_WEST >= 0 && i % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + SOUTH + SOUTH_WEST) as usize];
-        }
-        if i + SOUTH + SOUTH_EAST >= 0 && (i + 1) % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + SOUTH + SOUTH_EAST) as usize];
-        }
-        if i + SOUTH_WEST + WEST >= 0 && i % 8 > 1
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + SOUTH_WEST + WEST) as usize];
-        }
-        if i + SOUTH_EAST + EAST >= 0 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0
-        {
-            knight_attack_table[i as usize] |= bit_at_index[(i + SOUTH_EAST + EAST) as usize];
-        }
-        //print_bitboard(knight_attack_table[i as usize], &bit_at_index);
-    }
-    write_string_to_file("./src/chess_data_in/knight_attack_table.in", &write_64_array_to_string(&knight_attack_table));
-
-    let mut king_attack_table: [u64; 64] = [0; 64];
-    for k in 0..king_attack_table.len()
-    {
-        let i = k as isize;
-        king_attack_table[i as usize] = 0;
-        if i + NORTH <= 63
-        {
-            king_attack_table[i as usize] |= bit_at_index[(i + NORTH) as usize];
-            if i % 8 != 0
-            {
-                king_attack_table[i as usize] |= bit_at_index[(i + NORTH_WEST) as usize];
-            }
-            if (i + EAST) % 8 != 0
-            {
-                king_attack_table[i as usize] |= bit_at_index[(i + NORTH_EAST) as usize];
-            }
-        }
-        if i + SOUTH >= 0
-        {
-            king_attack_table[i as usize] |= bit_at_index[(i + SOUTH) as usize];
-            if i % 8 != 0
-            {
-                king_attack_table[i as usize] |= bit_at_index[(i + SOUTH_WEST) as usize];
-            }
-            if (i + EAST) % 8 != 0
-            {
-                king_attack_table[i as usize] |= bit_at_index[(i + SOUTH_EAST) as usize];
-            }
-        }
-        if i % 8 != 0
-        {
-            king_attack_table[i as usize] |= bit_at_index[(i + WEST) as usize];
-        }
-        if (i + EAST) % 8 != 0
-        {
-            king_attack_table[i as usize] |= bit_at_index[(i + EAST) as usize];
-        }
-        //print_bitboard(king_attack_table[i as usize], &bit_at_index);
-    }
-    write_string_to_file("./src/chess_data_in/king_attack_table.in", &write_64_array_to_string(&king_attack_table));
-
-    let mut pawn_capture_attack_table: [[u64; 64]; 2] = [[0; 64]; 2];
-    for i in 0..64
-    {
-        //white
-        if i + NORTH < 64
-        {
-            if i%8!=0
-            {
-                pawn_capture_attack_table[0][i as usize] |= bit_at_index[(i +NORTH_WEST)as usize];
-            }
-            if i%8!=7
-            {
-                pawn_capture_attack_table[0][i as usize] |= bit_at_index[(i +NORTH_EAST)as usize];
-            }
-        }
-        //black
-        if i + SOUTH >= 0
-        {
-            if i%8!=0
-            {
-                pawn_capture_attack_table[1][i as usize] |= bit_at_index[(i +SOUTH_WEST)as usize];
-            }
-            if i%8!=7
-            {
-                pawn_capture_attack_table[1][i as usize] |= bit_at_index[(i +SOUTH_EAST)as usize];
-            }
-        }
-    }
-    write_string_to_file("./src/chess_data_in/pawn_capture_attack_table.in", &write_2_64_array_to_string(&pawn_capture_attack_table));
-
-    let mut pawn_quiet_attack_table: [[u64; 64]; 2] = [[0; 64]; 2];
-    for i in 0..64
-    {
-        //white
-        if i + NORTH < 64
-        {
-            pawn_quiet_attack_table[0][i as usize] |= bit_at_index[(i +NORTH)as usize];
-        }
-        //black
-        if i + SOUTH >= 0
-        {
-            pawn_quiet_attack_table[1][i as usize] |= bit_at_index[(i +SOUTH)as usize];
-        }
-    }
-    write_string_to_file("./src/chess_data_in/pawn_quiet_attack_table.in", &write_2_64_array_to_string(&pawn_quiet_attack_table));
-
-    let mut is_passed: [[u64; 64]; 2] = [[0; 64]; 2];
-    for i in 0..64
-    {
-        is_passed[0][i] |= files_64[i];
-        if i % 8 != 0
-        {
-            is_passed[0][i] |= files_64[i - 1];
-        }
-        if i % 8 != 7
-        {
-            is_passed[0][i] |= files_64[i + 1];
-        }
-        is_passed[1][i] = is_passed[0][i];
-
-        //WHITE
-        for j in 0..((i/8)+1)
-        {
-            is_passed[0][i] &= !ranks[j];
-        }
-        //BLACK
-        for j in (i/8)..8
-        {
-            is_passed[1][i] &= !ranks[j];
-        }
-    }
-    write_string_to_file("./src/chess_data_in/is_passed.in", &write_2_64_array_to_string(&is_passed));
-    //panic!();
-    */
-  return 0;
-}
-/*
-fn print64_fields_to_chessboard(field_content: &Vec<String>)
-{
-    println!("");
-    for _ in 0..33
-    {
-        print!("{}", chess_data::HORIZONTAL_LINE_UNICODE);
-    }
-    println!("");
-    for h in 0..8
-    {
-        let i = 7 - h;
-        for j in 0..8
-        {
-            print!("{} {} ", chess_data::VERTICAL_LINE_UNICODE, field_content[8*i + j]);
-        }
-        print!("{} {}", chess_data::VERTICAL_LINE_UNICODE, (i+1) as u32);
-        println!("");
-        for _ in 0..33
-        {
-            print!("{}", chess_data::HORIZONTAL_LINE_UNICODE);
-        }
-        println!("");
-    }
-  	println!("  A   B   C   D   E   F   G   H");
-}
-
-fn print_bitboard(bitboard: u64, bit_at_index: &[u64; 64])
-{
-  let mut temp: Vec<String> = vec![String::new(); 64];
-  for  i in 0..bit_at_index.len()
+  uint64_t knightAttackTable[64] = {0};
+  for(size_t i = 0; i<64; i++)
   {
-
-    temp[i] = format!("{}", chess_data::ZERO_UNICODE);
-    if (bitboard & bit_at_index[i]) != 0
+    knightAttackTable[i] = 0;
+    if(i+NORTH+NORTH_EAST < 64 && i % 8 != 0)
     {
-        temp[i] = format!("{}", chess_data::ONE_UNICODE);
+      knightAttackTable[i] |= bitAtIndex[i + NORTH + NORTH_WEST];
+    }
+    if(i + NORTH + NORTH_EAST < 64 && (i + 1) % 8 != 0)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + NORTH + NORTH_EAST];
+    }
+    if(i + NORTH_WEST + WEST < 64 && i % 8 > 1)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + NORTH_WEST + WEST];
+    }
+    if(i + NORTH_EAST + EAST < 64 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + NORTH_EAST + EAST];
+    }
+    if(i + SOUTH + SOUTH_WEST < 64 && i % 8 != 0)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + SOUTH + SOUTH_WEST];
+    }
+    if(i + SOUTH + SOUTH_EAST < 64 && (i + 1) % 8 != 0)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + SOUTH + SOUTH_EAST];
+    }
+    if(i + SOUTH_WEST + WEST < 64 && i % 8 > 1)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + SOUTH_WEST + WEST];
+    }
+    if(i + SOUTH_EAST + EAST < 64 && (i + 1) % 8 < 7 && (i + 1) % 8 != 0)
+    {
+      knightAttackTable[i] |= bitAtIndex[i + SOUTH_EAST + EAST];
     }
   }
-  print64_fields_to_chessboard(&temp);
-}
+  stringToFile("./chessData/knightAttackTable.in", arrayToString<64>(knightAttackTable));
 
-fn rank_to_file(rank: u64, files: &[u64; 8]) -> u64
-{
-    (((rank & 0b11111111).wrapping_mul(MAIN_DIAGONAL)) & files[7]) >> 7
-}
+  uint64_t kingAttackTable[64] = {0};
+  for(size_t i = 0; i<64; i++)
+  {
+    kingAttackTable[i] = 0;
 
-fn get_hashkey_rank(index: usize, occupancy: u64) -> usize
-{
-    (((occupancy >> ((index / 8)*8)) >> 1) & 0b111111) as usize
-}
+    if(i + NORTH < 64)
+    {
+      kingAttackTable[i] |= bitAtIndex[i + NORTH];
+      if(i % 8 != 0)
+      {
+        kingAttackTable[i] |= bitAtIndex[i + NORTH_WEST];
+      }
+      if((i + EAST) % 8 != 0)
+      {
+        kingAttackTable[i] |= bitAtIndex[i + NORTH_EAST];
+      }
+    }
+    if(i + SOUTH < 64)
+    {
+      kingAttackTable[i] |= bitAtIndex[i + SOUTH];
+      if(i % 8 != 0)
+      {
+        kingAttackTable[i] |= bitAtIndex[i + SOUTH_WEST];
+      }
+      if((i + EAST) % 8 != 0)
+      {
+        kingAttackTable[i] |= bitAtIndex[i + SOUTH_EAST];
+      }
+    }
+    if(i % 8 != 0)
+    {
+      kingAttackTable[i] |= bitAtIndex[i + WEST];
+    }
+    if((i + EAST) % 8 != 0)
+    {
+      kingAttackTable[i] |= bitAtIndex[i + EAST];
+    }
+  }
+  stringToFile("./chessData/kingAttackTable.in", arrayToString<64>(kingAttackTable));
 
-fn get_hashkey_file(index: usize , occupancy: u64, files: &[u64; 8]) -> usize
-{
-    ((((((occupancy >> (index % 8)) & files[0] ).wrapping_mul(MAIN_DIAGONAL)) >> 56) >> 1) & 0b111111) as usize
-}
+  uint64_t pawnCaptureAttackTable[2][64] = {0};
+  for(size_t i = 0; i<64; i++)
+  {
+    //white
+    if(i + NORTH < 64)
+    {
+      if(i%8!=0)
+      {
+        pawnCaptureAttackTable[0][i] |= bitAtIndex[i +NORTH_WEST];
+      }
+      if(i%8!=7)
+      {
+        pawnCaptureAttackTable[0][i] |= bitAtIndex[i +NORTH_EAST];
+      }
+    }
+    //black
+    if(i + SOUTH < 64)
+    {
+      if(i%8!=0)
+      {
+        pawnCaptureAttackTable[1][i] |= bitAtIndex[i +SOUTH_WEST];
+      }
+      if(i%8!=7)
+      {
+        pawnCaptureAttackTable[1][i] |= bitAtIndex[i +SOUTH_EAST];
+      }
+    }
+  }
+  stringToFile("./chessData/pawnCaptureAttackTable.in", arrayOfArrayToString<2, 64>(pawnCaptureAttackTable));
 
-fn get_hashkey_diagonal(index: usize, occupancy: u64, files: &[u64; 8], diagonals_64: &[u64; 64]) -> usize
-{
-    (((((occupancy & diagonals_64[index]).wrapping_mul(files[0])) >> 56) >> 1) & 0b111111) as usize
-    //return ((((occupancy & diagonals64[fieldIndex])* files[0]) >> 56) >> 1) & 0b111111;
-}
+  uint64_t pawnQuietAttackTable[2][64] = {0};
+  for(size_t i = 0; i<64; i++)
+  {
+    //white
+    if(i + NORTH < 64)
+    {
+      pawnQuietAttackTable[0][i] |= bitAtIndex[i +NORTH];
+    }
+    //black
+    if(i + SOUTH < 64)
+    {
+      pawnQuietAttackTable[1][i] |= bitAtIndex[i +SOUTH];
+    }
+  }
+  stringToFile("./chessData/pawnQuietAttackTable.in", arrayOfArrayToString<2, 64>(pawnQuietAttackTable));
 
-fn get_hashkey_anti_diagonal(index: usize, occupancy: u64, files: &[u64; 8], anti_diagonals_64: &[u64; 64]) -> usize
-{
-    (((((occupancy & anti_diagonals_64[index]).wrapping_mul(files[0])) >> 56) >> 1) & 0b111111) as usize
+  uint64_t isPassed[2][64] = {0};
+  for(size_t i = 0; i<64; i++)
+  {
+    isPassed[0][i] |= files64[i];
+    if(i % 8 != 0)
+    {
+      isPassed[0][i] |= files64[i - 1];
+    }
+    if(i % 8 != 7)
+    {
+      isPassed[0][i] |= files64[i + 1];
+    }
+    isPassed[1][i] = isPassed[0][i];
+
+    //WHITE
+    for(size_t j = 0; j<(i/8)+1; j++)
+    {
+      isPassed[0][i] &= !ranks[j];
+    }
+    //BLACK
+    for(size_t j = (i/8); j<8; j++)
+    {
+      isPassed[1][i] &= !ranks[j];
+    }
+  }
+  stringToFile("./chessData/isPassed.in", arrayOfArrayToString<2, 64>(isPassed));
+  return 0;
 }
-*/
