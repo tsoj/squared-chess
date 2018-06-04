@@ -23,23 +23,23 @@ const uint64_t ANTI_DIAGONAL = 0b00000001000000100000010000001000000100000010000
 
 uint64_t rankToFile(uint64_t rank, uint64_t files[8])
 {
-  return (((rank & 0b11111111)*MAIN_DIAGONAL) & files[7]) >> 7;
+  return (((rank & 0b11111111U)*MAIN_DIAGONAL) & files[7]) >> 7;
 }
 size_t getHashkeyRank(size_t index, uint64_t occupancy)
 {
-  return ((occupancy >> ((index / 8)*8)) >> 1) & 0b111111;
+  return ((occupancy >> ((index / 8)*8)) >> 1) & 0b111111U;
 }
 size_t getHashkeyFile(size_t index, uint64_t occupancy, uint64_t files[8])
 {
-  return (((((occupancy >> (index % 8)) & files[0] )*MAIN_DIAGONAL) >> 56) >> 1) & 0b111111;
+  return (((((occupancy >> (index % 8)) & files[0] )*MAIN_DIAGONAL) >> 56) >> 1) & 0b111111U;
 }
 size_t getHashkeyDiagonal(size_t index, uint64_t occupancy, uint64_t files[8], uint64_t diagonals64[64])
 {
-  return ((((occupancy & diagonals64[index])*files[0]) >> 56) >> 1) & 0b111111;
+  return ((((occupancy & diagonals64[index])*files[0]) >> 56) >> 1) & 0b111111U;
 }
 size_t getHashkeyAntiDiagonal(size_t index, uint64_t occupancy, uint64_t files[8], uint64_t antiDiagonals64[64])
 {
-    return ((((occupancy & antiDiagonals64[index])*files[0]) >> 56) >> 1) & 0b111111;
+    return ((((occupancy & antiDiagonals64[index])*files[0]) >> 56) >> 1) & 0b111111U;
 }
 
 void printBitboard(uint64_t b)
