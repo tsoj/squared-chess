@@ -5,7 +5,7 @@
 
 #include "countZeros.hpp"
 
-namespace chessData
+namespace ChessData
 {
   const uint64_t BIT_AT_INDEX[64] =
   #include "chessData/bitAtIndex.in"
