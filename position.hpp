@@ -2,8 +2,10 @@
 
 #include "chessTypes.hpp"
 #include "chessData.hpp"
+#include "move.hpp"
 
 #include <string>
+#include <sstream>
 
 using namespace ChessTypes;
 using namespace ChessData;
@@ -16,8 +18,8 @@ struct Position
   uint64_t zobristKey;
   Player us;
   Player enemy;
-  uint16_t fullmovesPlayed;
-  uint16_t halfmoveClock;
+  int fullmovesPlayed;
+  int halfmoveClock;
 
   static Position emptyPosition()
   {
@@ -51,10 +53,10 @@ struct Position
   }
   std::string getString()
   {
-    std::string ret = "";
-    for(size_t rank = 0; rank<8; rank++)
+    std::string ret = "\n _ _ _ _ _ _ _ _\n";
+    for(size_t rank = 7; rank<8; rank--)
     {
-      for(size_t file = 7; file<=7; file--)
+      for(size_t file = 0; file<8; file++)
       {
         bool foundPiece = false;
         for(Player player = 0; player<NO_PLAYER; player++)
@@ -63,392 +65,317 @@ struct Position
           {
             if((BIT_AT_INDEX[8*rank + file] & this->pieces[piece] & this->players[player]) != 0)
             {
-              ret = getUnicodePiece(player, piece) + ret;
+              ret += "|\u0332"+getUnicodePiece(player, piece);
               foundPiece = true;
             }
           }
         }
         if(foundPiece == false)
         {
-          ret = " " + ret;
+          ret += "|_";
         }
       }
+      ret+="|\n";
     }
     return ret;
   }
-  /*pub fn get_fen_string(&self) -> String
+  uint64_t calculateZobristkey()
   {
-      let mut temp: Vec<String> = vec![String::new(); 64];
-      for  i in 0..BIT_AT_INDEX.len()
+    uint64_t ret = 0;
+    for(Piece i = 0; i<NO_PIECE; i++)
+    {
+      if(pieces[i]!=0)
       {
-            temp[i] = "1".to_string();
-            if (self.players[BLACK] & BIT_AT_INDEX[i]) != 0
-            {
-                if (self.pieces[PAWN] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "p".to_string();
-                }
-                else if (self.pieces[KNIGHT] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "n".to_string();
-                }
-                else if (self.pieces[BISHOP] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "b".to_string();
-                }
-                else if (self.pieces[ROOK] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "r".to_string();
-                }
-                else if (self.pieces[QUEEN] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "q".to_string();
-                }
-                else if (self.pieces[KING] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "k".to_string();
-                }
-            }
-            else if (self.players[WHITE] & BIT_AT_INDEX[i]) != 0
-            {
-                if (self.pieces[PAWN] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "P".to_string();
-                }
-                else if (self.pieces[KNIGHT] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "N".to_string();
-                }
-                else if (self.pieces[BISHOP] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "B".to_string();
-                }
-                else if (self.pieces[ROOK] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "R".to_string();
-                }
-                else if (self.pieces[QUEEN] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "Q".to_string();
-                }
-                else if (self.pieces[KING] & BIT_AT_INDEX[i]) != 0
-                {
-                    temp[i] = "K".to_string();
-                }
-            }
+        uint64_t tmpOccupancy = pieces[i];
+        while(tmpOccupancy != 0)
+        {
+          size_t squareIndex = ChessData::findAndClearTrailingOne(tmpOccupancy);
+          if((BIT_AT_INDEX[squareIndex] & players[WHITE]) != 0)
+          {
+            ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[WHITE][squareIndex];
+          }
+          else
+          {
+            ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[BLACK][squareIndex];
+          }
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[i][squareIndex];
         }
-      let mut fen = format_for_fen(&temp);
-      if self.us == WHITE
-      {
-            fen.push_str(" w ");
-        }
-      else
-      {
-            fen.push_str(" b ");
-        }
-      let castling = self.en_passant_castling & (RANKS[0] | RANKS[7]);
-      if castling != 0
-      {
-            if castling & CASTLING_KING_FROM[WHITE] != 0 &&
-               castling & CASTLING_KINGSIDE_ROOK_FROM[WHITE] != 0
-            {
-                fen.push_str("K");
-            }
-            if castling & CASTLING_KING_FROM[WHITE] != 0 &&
-               castling & CASTLING_QUEENSIDE_ROOK_FROM[WHITE] != 0
-            {
-                fen.push_str("Q");
-            }
-            if castling & CASTLING_KING_FROM[BLACK] != 0 &&
-               castling & CASTLING_KINGSIDE_ROOK_FROM[BLACK] != 0
-            {
-                fen.push_str("k");
-            }
-            if castling & CASTLING_KING_FROM[BLACK] != 0 &&
-               castling & CASTLING_QUEENSIDE_ROOK_FROM[BLACK] != 0
-            {
-                fen.push_str("q");
-            }
-            fen.push_str(" ");
-        }
-      else
-      {
-            fen.push_str("- ");
-        }
-      let en_passant = self.en_passant_castling & !castling;
-      if en_passant != 0
-      {
-            fen.push_str(get_field_notation(find_and_clear_trailing_one(&mut en_passant.clone())));
-        }
-      else
-      {
-            fen.push_str("-");
-        }
-      fen.push_str(" ");
-      fen.push_str(&(self.halfmove_clock).to_string());
-      fen.push_str(" ");
-      fen.push_str(&(self.fullmoves_played).to_string());
-      fen
+      }
+    }
+    ret ^= enPassant_castling;
+    ret ^= (uint64_t)us;
+    return ret;
   }
-  pub fn get_data_string(&self) -> String
-  {
-        let mut ret = "".to_string();
-        ret += "\nWHOSE MOVE: ";
-        ret += &self.us.to_string()[..];
-        ret += "\nFULLMOVES PLAYED: ";
-        ret += &self.fullmoves_played.to_string()[..];
-        ret += "\nHALFMOVE CLOCK: ";
-        ret += &self.halfmove_clock.to_string()[..];
-        ret += "\nZOBRIST KEY: ";
-        ret += &format!("{:x}", self.zobrist_key)[..];
-        ret += "\nCASTLING / EN PASSANT\n";
-        ret += &get_bitboard_string(self.en_passant_castling)[..];
-        ret += "WHITE:\n";
-        ret += &get_bitboard_string(self.players[WHITE])[..];
-        ret += "BLACK:\n";
-        ret += &get_bitboard_string(self.players[BLACK])[..];
-        ret += "PAWNS:\n";
-        ret += &get_bitboard_string(self.pieces[PAWN])[..];
-        ret += "KNIGHTS:\n";
-        ret += &get_bitboard_string(self.pieces[KNIGHT])[..];
-        ret += "BISHOPS:\n";
-        ret += &get_bitboard_string(self.pieces[BISHOP])[..];
-        ret += "ROOKS:\n";
-        ret += &get_bitboard_string(self.pieces[ROOK])[..];
-        ret += "QUEENS:\n";
-        ret += &get_bitboard_string(self.pieces[QUEEN])[..];
-        ret += "KINGS:\n";
-        ret += &get_bitboard_string(self.pieces[KING])[..];
-        ret
-    }
-  pub fn set_from_fen(&mut self, fen: &String) -> bool
-  {
-        let mut p = Position::empty_position();
-        let mut iter = (*fen).split_whitespace();
-        let piece_placement = iter.next().unwrap().to_string();
-        let active_color = iter.next().unwrap().to_string();
-        let castling_availability = iter.next().unwrap().to_string();
-        let en_passant_target_square = iter.next().unwrap().to_string();
-        let halfmove_clock = iter.next().unwrap().to_string();//fifty-move rule
-        let fullmove_number = iter.next().unwrap().to_string();
 
-        let mut field_counter: usize = 56;
-        for i in piece_placement.chars()
+  uint64_t getUpdatedZobristkey(const Move& m)
+  {
+    uint64_t ret = this->zobristKey;
+    ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.moved][m.from];
+    if(m.promoted != NO_PIECE)
+    {
+      ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.promoted][m.to];
+    }
+    else
+    {
+      ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.moved][m.to];
+    }
+
+    ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][m.from];
+    ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][m.to];
+
+    if(m.captured != NO_PIECE && !m.capturedEnPassant)
+    {
+      ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.captured][m.to];
+      ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->enemy][m.to];
+    }
+
+      ret ^= this->enPassant_castling;
+      ret ^= m.enPassant_castling;
+      ret ^= (uint64_t)WHITE;
+      ret ^= (uint64_t)BLACK;
+
+      if(m.capturedEnPassant)
+      {
+        size_t capturedIndex = CountZeros::trailingZeros(PAWN_QUIET_ATTACK_TABLE[this->enemy][m.to]);
+        ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[PAWN][capturedIndex];
+        ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->enemy][capturedIndex];
+      }
+
+      if(m.castled)
+      {
+        //IF QUEENSIDE
+        if(m.to == CASTLING_QUEENSIDE_KING_TO_INDEX[this->us])
         {
-            match i
-            {
-                '/' => field_counter-=16,
-                '8' => field_counter+=8,
-                '7' => field_counter+=7,
-                '6' => field_counter+=6,
-                '5' => field_counter+=5,
-                '4' => field_counter+=4,
-                '3' => field_counter+=3,
-                '2' => field_counter+=2,
-                '1' => field_counter+=1,
-                '0' => field_counter+=0,
-                'P' =>
-                {
-                    p.add_piece(WHITE, PAWN, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'N' =>
-                {
-                    p.add_piece(WHITE, KNIGHT, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'B' =>
-                {
-                    p.add_piece(WHITE, BISHOP, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'R' =>
-                {
-                    p.add_piece(WHITE, ROOK, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'Q' =>
-                {
-                    p.add_piece(WHITE, QUEEN, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'K' =>
-                {
-                    p.add_piece(WHITE, KING, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'p' =>
-                {
-                    p.add_piece(BLACK, PAWN, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'n' =>
-                {
-                    p.add_piece(BLACK, KNIGHT, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'b' =>
-                {
-                    p.add_piece(BLACK, BISHOP, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'r' =>
-                {
-                    p.add_piece(BLACK, ROOK, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'q' =>
-                {
-                    p.add_piece(BLACK, QUEEN, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                'k' =>
-                {
-                    p.add_piece(BLACK, KING, BIT_AT_INDEX[field_counter]);
-                    field_counter+=1;
-                },
-                _x =>
-                {
-                    println!("FEN-string not formatted properly.");
-                    return false;
-                }
-            }
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_QUEENSIDE_ROOK_FROM_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_QUEENSIDE_ROOK_TO_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][CASTLING_QUEENSIDE_ROOK_FROM_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][CASTLING_QUEENSIDE_ROOK_TO_INDEX[this->us]];
         }
-        if active_color == "w" || active_color == "W"
-        {
-            p.us = WHITE;
-            p.enemy = BLACK;
-        }
-        else if active_color == "b" || active_color == "B"
-        {
-            p.us = BLACK;
-            p.enemy = WHITE;
-        }
+        //IF KINGSIDE
         else
         {
-            println!("FEN-string not formatted properly.");
-            return false;
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_KINGSIDE_ROOK_FROM_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_KINGSIDE_ROOK_TO_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][CASTLING_KINGSIDE_ROOK_FROM_INDEX[this->us]];
+          ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->us][CASTLING_KINGSIDE_ROOK_TO_INDEX[this->us]];
         }
-        for i in castling_availability.chars()
-        {
-            match i
-            {
-                '-' => {},
-                'K' => p.en_passant_castling |= CASTLING_KINGSIDE_ROOK_FROM[WHITE] | CASTLING_KING_FROM[WHITE],
-                'k' => p.en_passant_castling |= CASTLING_KINGSIDE_ROOK_FROM[BLACK] | CASTLING_KING_FROM[BLACK],
-                'Q' => p.en_passant_castling |= CASTLING_QUEENSIDE_ROOK_FROM[WHITE] | CASTLING_KING_FROM[WHITE],
-                'q' => p.en_passant_castling |= CASTLING_QUEENSIDE_ROOK_FROM[BLACK] | CASTLING_KING_FROM[BLACK],
-                _x =>
-                {
-                    println!("FEN-string not formatted properly.");
-                    return false;
-                }
-            }
-        }
-        if en_passant_target_square!="-"
-        {
-            let en_passant_target_field_index = get_field_index(&en_passant_target_square[..]);
-            if en_passant_target_field_index == 64
-            {
-                println!("FEN-string not formatted properly.");
-                return false;
-            }
-            p.en_passant_castling |= BIT_AT_INDEX[en_passant_target_field_index];
-        }
-        p.halfmove_clock = halfmove_clock.parse::<u16>().unwrap();
-        p.fullmoves_played = fullmove_number.parse::<u16>().unwrap();
-        p.zobrist_key = p.calculate_zobristkey();
-        self.clone_from(&p);
-        true
-    }
-  pub fn calculate_zobristkey(&self) -> u64
+      }
+      return ret;
+  }
+  bool setFromFen(std::string fen)
   {
-        let mut ret: u64 = 0;
-        for i in 0..NO_PIECE
+    *this = emptyPosition();
+    std::stringstream buffer = std::stringstream(fen);
+    std::string pieces;
+    std::getline(buffer, pieces, ' ');
+    std::string activeColor;
+    std::getline(buffer, activeColor, ' ');
+    std::string castlingAvailability;
+    std::getline(buffer, castlingAvailability, ' ');
+    std::string enPassantTargetSquare;
+    std::getline(buffer, enPassantTargetSquare, ' ');
+    std::string halfmoveClock;
+    std::getline(buffer, halfmoveClock, ' ');
+    std::string fullmoveNumber;
+    std::getline(buffer, fullmoveNumber, ' ');
+
+    std::cout << ">" << pieces << "<" << std::endl;
+    std::cout << ">" << activeColor << "<" << std::endl;
+    std::cout << ">" << castlingAvailability << "<" << std::endl;
+    std::cout << ">" << enPassantTargetSquare << "<" << std::endl;
+    std::cout << ">" << halfmoveClock << "<" << std::endl;
+    std::cout << ">" << fullmoveNumber << "<" << std::endl;
+
+    size_t squareCounter = 56;
+    for(auto i : pieces)
+    {
+      switch(i)
+      {
+        case '/':
         {
-            if self.pieces[i] != 0
-            {
-                let mut temp_occupancy = self.pieces[i];
-                loop
-                {
-                    let field_index = temp_occupancy.trailing_zeros() as usize;
-                    if (BIT_AT_INDEX[field_index] & self.players[WHITE])!=0
-                    {
-                        ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[WHITE][field_index];
-                    }
-                    else
-                    {
-                        ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[BLACK][field_index];
-                    }
-                    ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[i][field_index];
-                    temp_occupancy &= !BIT_AT_INDEX[field_index];
-                    if temp_occupancy == 0
-                    {
-                        break;
-                    }
-                }
-            }
+          squareCounter-=16;
+          break;
         }
-        ret ^= self.en_passant_castling;
-        ret ^= self.us as u64;
-        ret
+        case '8':
+        {
+          squareCounter+=8;
+          break;
+        }
+        case '7':
+        {
+          squareCounter+=7;
+          break;
+        }
+        case '6':
+        {
+          squareCounter+=6;
+          break;
+        }
+        case '5':
+        {
+          squareCounter+=5;
+          break;
+        }
+        case '4':
+        {
+          squareCounter+=4;
+          break;
+        }
+        case '3':
+        {
+          squareCounter+=3;
+          break;
+        }
+        case '2':
+        {
+          squareCounter+=2;
+          break;
+        }
+        case '1':
+        {
+          squareCounter+=1;
+          break;
+        }
+        case '0':
+        {
+          squareCounter+=0;
+          break;
+        }
+        case 'P':
+        {
+          this->addPiece(WHITE, PAWN, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'N':
+        {
+          this->addPiece(WHITE, KNIGHT, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'B':
+        {
+          this->addPiece(WHITE, BISHOP, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'R':
+        {
+          this->addPiece(WHITE, ROOK, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'Q':
+        {
+          this->addPiece(WHITE, QUEEN, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'K':
+        {
+          this->addPiece(WHITE, KING, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'p':
+        {
+          this->addPiece(BLACK, PAWN, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'n':
+        {
+          this->addPiece(BLACK, KNIGHT, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'b':
+        {
+          this->addPiece(BLACK, BISHOP, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'r':
+        {
+          this->addPiece(BLACK, ROOK, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'q':
+        {
+          this->addPiece(BLACK, QUEEN, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        case 'k':
+        {
+          this->addPiece(BLACK, KING, BIT_AT_INDEX[squareCounter]);
+          squareCounter+=1;
+          break;
+        };
+        default: return false;
+      }
     }
-  pub fn get_updated_zobristkey(&self, m: &Move) -> u64
-  {
-        let mut ret: u64 = self.zobrist_key;
-
-        ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.moved][m.from];
-        if m.promoted != NO_PIECE
-        {
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.promoted][m.to];
-        }
-        else
-        {
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.moved][m.to];
-        }
-
-        ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][m.from];
-        ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][m.to];
-
-        if m.captured != NO_PIECE && !m.captured_en_passant
-        {
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.captured][m.to];
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.enemy][m.to];
-        }
-
-        ret ^= self.en_passant_castling;
-        ret ^= m.en_passant_castling;
-        ret ^= WHITE as u64;
-        ret ^= BLACK as u64;
-
-        if m.captured_en_passant
-        {
-            let captured_index = PAWN_QUIET_ATTACK_TABLE[self.enemy][m.to].trailing_zeros() as usize;
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[PAWN][captured_index];
-            ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.enemy][captured_index];
-        }
-
-        if m.castled
-        {
-            //IF QUEENSIDE
-            if m.to == CASTLING_QUEENSIDE_KING_TO_INDEX[self.us]
-            {
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_QUEENSIDE_ROOK_FROM_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_QUEENSIDE_ROOK_TO_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][CASTLING_QUEENSIDE_ROOK_FROM_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][CASTLING_QUEENSIDE_ROOK_TO_INDEX[self.us]];
-            }
-            //IF KINGSIDE
-            else
-            {
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_KINGSIDE_ROOK_FROM_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[ROOK][CASTLING_KINGSIDE_ROOK_TO_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][CASTLING_KINGSIDE_ROOK_FROM_INDEX[self.us]];
-                ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[self.us][CASTLING_KINGSIDE_ROOK_TO_INDEX[self.us]];
-            }
-        }
-        ret
+    if(activeColor == "w" || activeColor == "W")
+    {
+      this->us = WHITE;
+      this->enemy = BLACK;
     }
+    else if(activeColor == "b" || activeColor == "B")
+    {
+      this->us = BLACK;
+      this->enemy = WHITE;
+    }
+    else
+    {
+      return false;
+    }
+    for(auto i : castlingAvailability)
+    {
+      switch(i)
+      {
+        case '-':
+        {
+          break;
+        }
+        case 'K':
+        {
+          this->enPassant_castling |= CASTLING_KINGSIDE_ROOK_FROM[WHITE] | CASTLING_KING_FROM[WHITE];
+          break;
+        }
+        case 'k':
+        {
+          this->enPassant_castling |= CASTLING_KINGSIDE_ROOK_FROM[BLACK] | CASTLING_KING_FROM[BLACK];
+          break;
+        }
+        case 'Q':
+        {
+          this->enPassant_castling |= CASTLING_QUEENSIDE_ROOK_FROM[WHITE] | CASTLING_KING_FROM[WHITE];
+          break;
+        }
+        case 'q':
+        {
+          this->enPassant_castling |= CASTLING_QUEENSIDE_ROOK_FROM[BLACK] | CASTLING_KING_FROM[BLACK];
+          break;
+        }
+        default: return false;
+      }
+    }
+    if(enPassantTargetSquare != "-")
+    {
+      size_t enPassantTargetSquareIndex = getSquareIndex(enPassantTargetSquare);
+      if(enPassantTargetSquareIndex>=64)
+      {
+        return false;
+      }
+      this->enPassant_castling |= BIT_AT_INDEX[enPassantTargetSquareIndex];
+    }
+    this->halfmoveClock = std::stoi(halfmoveClock);
+    this->fullmovesPlayed = std::stoi(fullmoveNumber);
+    zobristKey = calculateZobristkey();
+    return true;
+  }
+  /*
   pub fn generate_move_list(&self) -> MoveList
   {
         let mut move_list = MoveList::empty_move_list();
@@ -558,7 +485,7 @@ struct Position
             else
             {
                 self.remove_piece(us, m.moved, BIT_AT_INDEX[m.from]);
-                self.add_piece(us, m.promoted, BIT_AT_INDEX[m.to]);
+                self.addPiece(us, m.promoted, BIT_AT_INDEX[m.to]);
             }
         }
         if m.moved == PAWN || m.captured != NO_PIECE

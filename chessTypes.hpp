@@ -5,6 +5,8 @@
 
 namespace ChessTypes
 {
+  typedef int32_t Score;
+
   typedef size_t Player;
 
   const Player WHITE = 0;
