@@ -13,7 +13,7 @@ namespace ChessTypes
   const Player BLACK = 1;
   const Player NO_PLAYER = 2;
 
-  std::string getUnicodePlayer(Player player)
+  inline std::string getUnicodePlayer(Player player)
   {
     if(player==WHITE)
     {
@@ -40,7 +40,7 @@ namespace ChessTypes
   const Piece KING = 5;
   const Piece NO_PIECE = 6;
 
-  std::string getUnicodePiece(Player player, Piece piece)
+  inline std::string getUnicodePiece(Player player, Piece piece)
   {
     if(player == BLACK)
     {
@@ -77,7 +77,7 @@ namespace ChessTypes
     return "?";
   }
 
-  std::string getNotation(Player player, Piece piece)
+  inline std::string getNotation(Player player, Piece piece)
   {
     if(player == BLACK)
     {
@@ -114,7 +114,7 @@ namespace ChessTypes
     return "?";
   }
 
-  std::tuple<Player, Piece> get_piece(std::string s)
+  inline std::tuple<Player, Piece> get_piece(std::string s)
   {
     if(s=="p")
     {

@@ -1,10 +1,10 @@
-CC      = clang++
-CFLAGS  = -std=c++14 -O3
-LDFLAGS = -std=c++14 -O3
+CC      = g++
+CFLAGS  = -std=c++17 -O3
+LDFLAGS = -std=c++17 -O3
 NAME = ^2-chess
 BIN_FILE_PATH = ./bin/
 
-CPP = main.cpp
+CPP = main.cpp position.cpp move.cpp
 OBJ = $(CPP:%.cpp=%.o)
 OBJ_DEST = $(CPP:%.cpp=$(BIN_FILE_PATH)%.o)
 
