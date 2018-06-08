@@ -38,7 +38,7 @@ void Position::movePiece(const Player player, const Piece piece, const uint64_t 
   this->removePiece(player, piece, from);
   this->addPiece(player, piece, to);
 }
-std::string Position::getString()
+std::string Position::getString() const
 {
   std::string ret = "\n _ _ _ _ _ _ _ _\n";
   for(size_t rank = 7; rank<8; rank--)
@@ -66,7 +66,7 @@ std::string Position::getString()
   }
   return ret;
 }
-uint64_t Position::calculateZobristkey()
+uint64_t Position::calculateZobristKey() const
 {
   uint64_t ret = 0;
   for(Piece i = 0; i<NO_PIECE; i++)
@@ -93,7 +93,7 @@ uint64_t Position::calculateZobristkey()
   ret ^= (uint64_t)us;
   return ret;
 }
-uint64_t Position::getUpdatedZobristkey(const Move& m)
+uint64_t Position::getUpdatedZobristKey(const Move& m) const
 {
   uint64_t ret = this->zobristKey;
   ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[m.moved][m.from];
@@ -351,7 +351,7 @@ bool Position::setFromFen(const std::string fen)
   }
   this->halfmoveClock = std::stoi(halfmoveClock);
   this->fullmovesPlayed = std::stoi(fullmoveNumber);
-  this->zobristKey = calculateZobristkey();
+  this->zobristKey = calculateZobristKey();
   return true;
 }
 bool Position::inCheck(Player us, Player enemy, size_t kingsIndex) const
@@ -394,4 +394,89 @@ bool Position::inCheck(Player us, Player enemy) const
     const size_t kingsIndex = trailingZeros(this->pieces[KING] & this->players[us]);
     ASSERT(kingsIndex<64);
     return this->inCheck(us, enemy, kingsIndex);
+}
+MoveList Position::generateMoveList() const
+{
+  MoveList moveList = MoveList();
+  const uint64_t newEnPassantCastling = this->enPassantCastling & (RANKS[0] | RANKS[7]);
+  moveList.generateCastlingMoves((*this), newEnPassantCastling);
+  moveList.generateMoves<PAWN>((*this), newEnPassantCastling, false);
+  moveList.generateMoves<KNIGHT>((*this), newEnPassantCastling, false);
+  moveList.generateMoves<BISHOP>((*this), newEnPassantCastling, false);
+  moveList.generateMoves<ROOK>((*this), newEnPassantCastling, false);
+  moveList.generateMoves<QUEEN>((*this), newEnPassantCastling, false);
+  moveList.generateMoves<KING>((*this), newEnPassantCastling, false);
+  return moveList;
+}
+MoveList Position::generateCaptureMoveList() const
+{
+  MoveList moveList = MoveList();
+  const uint64_t newEnPassantCastling = this->enPassantCastling & (RANKS[0] | RANKS[7]);
+  moveList.generateMoves<PAWN>((*this), newEnPassantCastling, true);
+  moveList.generateMoves<KNIGHT>((*this), newEnPassantCastling, true);
+  moveList.generateMoves<BISHOP>((*this), newEnPassantCastling, true);
+  moveList.generateMoves<ROOK>((*this), newEnPassantCastling, true);
+  moveList.generateMoves<QUEEN>((*this), newEnPassantCastling, true);
+  moveList.generateMoves<KING>((*this), newEnPassantCastling, true);
+  return moveList;
+}
+void Position::makeMove(Move m)
+{
+  const Player enemy = this->enemy;
+  const Player us = this->us;
+  this->enPassantCastling = m.enPassantCastling;
+  // en passant
+  if(m.capturedEnPassant)
+  {
+    this->removePiece(enemy, PAWN, PAWN_QUIET_ATTACK_TABLE[enemy][m.to]);
+    this->movePiece(us, PAWN, BIT_AT_INDEX[m.from], BIT_AT_INDEX[m.to]);
+  }
+  // castling
+  else if(m.castled)
+  {
+    // QUEENSIDE
+    if(m.to == CASTLING_QUEENSIDE_KING_TO_INDEX[us])
+    {
+      this->movePiece(us, KING, CASTLING_KING_FROM[us], CASTLING_QUEENSIDE_KING_TO[us]);
+      this->movePiece(us, ROOK, CASTLING_QUEENSIDE_ROOK_FROM[us], CASTLING_QUEENSIDE_ROOK_TO[us]);
+    }
+    // KINGSIDE
+    else
+    {
+      this->movePiece(us, KING, CASTLING_KING_FROM[us], CASTLING_KINGSIDE_KING_TO[us]);
+      this->movePiece(us, ROOK, CASTLING_KINGSIDE_ROOK_FROM[us], CASTLING_KINGSIDE_ROOK_TO[us]);
+    }
+  }
+  else
+  {
+    if(m.captured != NO_PIECE)
+    {
+      this->removePiece(enemy, m.captured, BIT_AT_INDEX[m.to]);
+    }
+    if(m.promoted == NO_PIECE)
+    {
+      this->movePiece(us, m.moved, BIT_AT_INDEX[m.from], BIT_AT_INDEX[m.to]);
+    }
+    else
+    {
+      this->removePiece(us, m.moved, BIT_AT_INDEX[m.from]);
+      this->addPiece(us, m.promoted, BIT_AT_INDEX[m.to]);
+    }
+  }
+  if(m.moved == PAWN || m.captured != NO_PIECE)
+  {
+    this->halfmoveClock = 0;
+  }
+  else
+  {
+    this->halfmoveClock += 1;
+  }
+  if(this->us == BLACK)
+  {
+    this->fullmovesPlayed += 1;
+  }
+  const Player tmp = this->us;
+  this->us = this->enemy;
+  this->enemy = tmp;
+  this->zobristKey = m.zobristKey;
 }

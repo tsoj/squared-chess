@@ -1,9 +1,5 @@
 #include "move.hpp"
 
-
-using namespace ChessData;
-using namespace CountZeros;
-
 std::vector<Move> MoveList::movePool = std::vector<Move>();
 std::vector<size_t> MoveList::freeOffsets = {0};
 
@@ -26,14 +22,14 @@ void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t 
         const size_t to = trailingZeros(PAWN_QUIET_ATTACK_TABLE[us][from]);
         if((BIT_AT_INDEX[to] & HOME_RANK[enemy]) != 0)
         {
-          this->addMove(from, to, PAWN, NO_PIECE, KNIGHT, newEnPassantCastling, false, false);
-          this->addMove(from, to, PAWN, NO_PIECE, BISHOP, newEnPassantCastling, false, false);
-          this->addMove(from, to, PAWN, NO_PIECE, ROOK, newEnPassantCastling, false, false);
-          this->addMove(from, to, PAWN, NO_PIECE, QUEEN, newEnPassantCastling, false, false);
+          this->addMove(from, to, PAWN, NO_PIECE, KNIGHT, newEnPassantCastling, false, false, origPosition);
+          this->addMove(from, to, PAWN, NO_PIECE, BISHOP, newEnPassantCastling, false, false, origPosition);
+          this->addMove(from, to, PAWN, NO_PIECE, ROOK, newEnPassantCastling, false, false, origPosition);
+          this->addMove(from, to, PAWN, NO_PIECE, QUEEN, newEnPassantCastling, false, false, origPosition);
         }
         else if(not onlyCaptures)
         {
-          this->addMove(from, to, PAWN, NO_PIECE, NO_PIECE, newEnPassantCastling, false, false);
+          this->addMove(from, to, PAWN, NO_PIECE, NO_PIECE, newEnPassantCastling, false, false, origPosition);
           if((BIT_AT_INDEX[from] & PAWN_HOME_RANK[us]) != 0)
           {
             const size_t doublePushTo = trailingZeros(PAWN_QUIET_ATTACK_TABLE[us][to]);
@@ -47,7 +43,8 @@ void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t 
                 NO_PIECE,
                 newEnPassantCastling | BIT_AT_INDEX[to],
                 false,
-                false
+                false,
+                origPosition
               );
             }
           }
@@ -68,14 +65,14 @@ void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t 
               if((BIT_AT_INDEX[to] & HOME_RANK[enemy]) != 0)
               {
                 const uint64_t updatedNewEnPassantCastling = newEnPassantCastling & ~BIT_AT_INDEX[to];
-                this->addMove(from, to, PAWN, captured, KNIGHT, updatedNewEnPassantCastling, false, false);
-                this->addMove(from, to, PAWN, captured, BISHOP, updatedNewEnPassantCastling, false, false);
-                this->addMove(from, to, PAWN, captured, ROOK, updatedNewEnPassantCastling, false, false);
-                this->addMove(from, to, PAWN, captured, QUEEN, updatedNewEnPassantCastling, false, false);
+                this->addMove(from, to, PAWN, captured, KNIGHT, updatedNewEnPassantCastling, false, false, origPosition);
+                this->addMove(from, to, PAWN, captured, BISHOP, updatedNewEnPassantCastling, false, false, origPosition);
+                this->addMove(from, to, PAWN, captured, ROOK, updatedNewEnPassantCastling, false, false, origPosition);
+                this->addMove(from, to, PAWN, captured, QUEEN, updatedNewEnPassantCastling, false, false, origPosition);
               }
               else
               {
-                this->addMove(from, to, PAWN, captured, NO_PIECE, newEnPassantCastling, false, false);
+                this->addMove(from, to, PAWN, captured, NO_PIECE, newEnPassantCastling, false, false, origPosition);
               }
               break;
             }
@@ -88,7 +85,7 @@ void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t 
       if(captureAttackMask != 0)
       {
           const size_t to = trailingZeros(captureAttackMask);
-          this->addMove(from, to, PAWN, PAWN, NO_PIECE, newEnPassantCastling, false, true);
+          this->addMove(from, to, PAWN, PAWN, NO_PIECE, newEnPassantCastling, false, true, origPosition);
       }
     }
   }
@@ -118,7 +115,8 @@ void MoveList::generateCastlingMoves(const Position& origPosition, uint64_t newE
         NO_PIECE,
         newEnPassantCastling & ~(CASTLING_KING_FROM[us] | CASTLING_QUEENSIDE_ROOK_FROM[us]),
         true,
-        false
+        false,
+        origPosition
       );
     }
     // kingside castling
@@ -137,7 +135,8 @@ void MoveList::generateCastlingMoves(const Position& origPosition, uint64_t newE
         NO_PIECE,
         newEnPassantCastling & ~(CASTLING_KING_FROM[us] | CASTLING_KINGSIDE_ROOK_FROM[us]),
         true,
-        false
+        false,
+        origPosition
       );
     }
   }

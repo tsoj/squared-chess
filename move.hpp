@@ -9,6 +9,7 @@
 
 using namespace ChessTypes;
 using namespace ChessData;
+using namespace CountZeros;
 
 
 struct Move
@@ -22,10 +23,10 @@ struct Move
     bool castled;
     bool capturedEnPassant;
     Score score;
+    uint64_t zobristKey;
 };
 
-
-class MoveList
+struct MoveList
 {
   private:
 
@@ -47,6 +48,7 @@ class MoveList
       movePool.resize(offset+MOVE_LIST_MAXIMUM_SIZE);
       freeOffsets.push_back(movePool.size());
     }
+    ASSERT(offset+MOVE_LIST_MAXIMUM_SIZE <= movePool.size());
     size = 0;
   }
   ~MoveList()
@@ -54,13 +56,13 @@ class MoveList
     freeOffsets.push_back(offset);
   }
 
-  Move& operator[](size_t i)
+  Move& operator[](const size_t i)
   {
     ASSERT(i+offset < MOVE_LIST_MAXIMUM_SIZE)
     ASSERT(i+offset < size)
     return movePool[i+offset];
   }
-  const Move& operator[](size_t i) const
+  const Move& operator[](const size_t i) const
   {
     ASSERT(i+offset < MOVE_LIST_MAXIMUM_SIZE)
     ASSERT(i+offset < size)
@@ -75,8 +77,8 @@ class MoveList
     const Piece promoted,
     const uint64_t enPassantCastling,
     const bool castled,
-    const bool capturedEnPassant/*,
-    const Position& origPosition*/
+    const bool capturedEnPassant,
+    const Position& origPosition
   )
   {
     size++;
@@ -89,29 +91,70 @@ class MoveList
     (*this)[size-1].castled = castled;
     (*this)[size-1].capturedEnPassant = capturedEnPassant;
     (*this)[size-1].score = 0;
-    //TODO: ? zobristKey
+    (*this)[size-1].zobristKey = origPosition.getUpdatedZobristKey((*this)[size-1]);
   }
 
-  template<Piece p>
-  void generateMoves(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures)
-  {
-    ASSERT(false);
-  }
-  void generateCastlingMoves(const Position& origPosition, uint64_t newEnPassantCastling);
+  template<Piece piece>
+  void generateMoves(const Position& origPosition, const uint64_t newEnPassantCastling, const bool onlyCaptures);
+  void generateCastlingMoves(const Position& origPosition, const uint64_t newEnPassantCastling);
 
 };
+
+template<Piece piece>
+void MoveList::generateMoves(const Position& origPosition, const uint64_t newEnPassantCastling, const bool onlyCaptures)
+{
+  ASSERT(piece < NO_PIECE && piece != PAWN);
+
+  const Player enemy = origPosition.enemy;
+  const Player us = origPosition.us;
+  uint64_t pieceOccupancy = origPosition.pieces[piece] & origPosition.players[us];
+  if(pieceOccupancy != 0)
+  {
+
+    while(pieceOccupancy != 0)
+    {
+      const size_t from = findAndClearTrailingOne(pieceOccupancy);
+
+      const uint64_t occupancy = origPosition.players[WHITE] | origPosition.players[BLACK];
+      uint64_t quietAttackMask = getAttackMask<piece>(from, occupancy);
+      uint64_t captureAttackMask = quietAttackMask & origPosition.players[enemy];
+      quietAttackMask &= !captureAttackMask;
+      quietAttackMask &= !origPosition.players[us];
+
+      if(quietAttackMask != 0 && not onlyCaptures)
+      {
+        while(quietAttackMask != 0)
+        {
+          const size_t to = findAndClearTrailingOne(quietAttackMask);
+          const uint64_t updatedNewEnPassantCastling = newEnPassantCastling & ~BIT_AT_INDEX[from];
+          this->addMove(from, to, piece, NO_PIECE, NO_PIECE, updatedNewEnPassantCastling, false, false, origPosition);
+        }
+      }
+
+      if(captureAttackMask != 0)
+      {
+        while(captureAttackMask != 0)
+        {
+          const size_t to = findAndClearTrailingOne(captureAttackMask);
+          for(Piece captured = 0; captured<NO_PIECE; captured++)
+          {
+            if((origPosition.pieces[captured] & BIT_AT_INDEX[to]) != 0)
+            {
+              const uint64_t updatedNewEnPassantCastling = newEnPassantCastling & ~(BIT_AT_INDEX[to] | BIT_AT_INDEX[from]);
+              this->addMove(from, to, piece, captured, NO_PIECE, updatedNewEnPassantCastling, false, false, origPosition);
+              break;
+            }
+          }
+        }
+      }
+
+    }
+
+  }
+}
+
 template<>
-void MoveList::generateMoves<PAWN>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
-template<>
-void MoveList::generateMoves<KNIGHT>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
-template<>
-void MoveList::generateMoves<BISHOP>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
-template<>
-void MoveList::generateMoves<ROOK>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
-template<>
-void MoveList::generateMoves<QUEEN>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
-template<>
-void MoveList::generateMoves<KING>(const Position& origPosition, uint64_t newEnPassantCastling, bool onlyCaptures);
+void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t newEnPassantCastling, const bool onlyCaptures);
 
 
 
