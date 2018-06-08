@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #if defined(__GNUC__) || defined(__clang__)
   #ifdef __i386
@@ -13,12 +14,19 @@
 
 namespace CountZeros
 {
-  inline int trailingZeros(uint64_t mask);
-  inline int leadingZeros(uint64_t mask);
+  inline int trailingZeros(const uint64_t mask);
+  inline int leadingZeros(const uint64_t mask);
+
+  inline size_t findAndClearTrailingOne(uint64_t & mask)
+  {
+    size_t ret = trailingZeros(mask);
+    mask &= mask -1;
+    return ret;
+  }
 
   #if defined(__GNUC__) || defined(__clang__)
     #ifdef ARCH_X86_64
-      inline int trailingZeros(uint64_t mask)
+      inline int trailingZeros(const uint64_t mask)
       {
         uint64_t Ret;
         __asm__
@@ -29,7 +37,7 @@ namespace CountZeros
         );
         return (int)Ret;
       }
-      inline int leadingZeros(uint64_t mask)
+      inline int leadingZeros(const uint64_t mask)
       {
         uint64_t Ret;
         __asm__

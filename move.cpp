@@ -1,99 +1,144 @@
 #include "move.hpp"
 
+
+using namespace ChessData;
+using namespace CountZeros;
+
 std::vector<Move> MoveList::movePool = std::vector<Move>();
-std::vector<size_t> MoveList::freeOffsets = std::vector<size_t>();
+std::vector<size_t> MoveList::freeOffsets = {0};
 
 template<>
-void MoveList::generateMoves<PAWN>()
+void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t newEnPassantCastling, const bool onlyCaptures)
 {
-  /*const Player enemy = origPosition.enemy;
+  const Player enemy = origPosition.enemy;
   const Player us = origPosition.us;
   uint64_t pawnOccupancy = origPosition.pieces[PAWN] & origPosition.players[us];
-  uint64_t occupancy = origPosition.players[WHITE] | origPosition.players[BLACK];
-  /*
-      if pawn_occupancy != 0
+  const uint64_t occupancy = origPosition.players[WHITE] | origPosition.players[BLACK];
+  if(pawnOccupancy != 0)
+  {
+    while(pawnOccupancy != 0)
+    {
+      const size_t from = findAndClearTrailingOne(pawnOccupancy);
+
+      // quiet single and double push moves
+      if((PAWN_QUIET_ATTACK_TABLE[us][from] & occupancy) == 0)
       {
-          loop
+        const size_t to = trailingZeros(PAWN_QUIET_ATTACK_TABLE[us][from]);
+        if((BIT_AT_INDEX[to] & HOME_RANK[enemy]) != 0)
+        {
+          this->addMove(from, to, PAWN, NO_PIECE, KNIGHT, newEnPassantCastling, false, false);
+          this->addMove(from, to, PAWN, NO_PIECE, BISHOP, newEnPassantCastling, false, false);
+          this->addMove(from, to, PAWN, NO_PIECE, ROOK, newEnPassantCastling, false, false);
+          this->addMove(from, to, PAWN, NO_PIECE, QUEEN, newEnPassantCastling, false, false);
+        }
+        else if(not onlyCaptures)
+        {
+          this->addMove(from, to, PAWN, NO_PIECE, NO_PIECE, newEnPassantCastling, false, false);
+          if((BIT_AT_INDEX[from] & PAWN_HOME_RANK[us]) != 0)
           {
-              let from = find_and_clear_trailing_one(&mut pawn_occupancy) as usize;
-
-              if PAWN_QUIET_ATTACK_TABLE[us][from] & occupancy == 0
-              {
-                  let to = PAWN_QUIET_ATTACK_TABLE[us][from].trailing_zeros() as usize;
-                  if BIT_AT_INDEX[to] & HOME_RANK[enemy] != 0
-                  {
-                      self.add_move(from, to, PAWN, NO_PIECE, KNIGHT, new_en_passant_castling, false, false, &orig_position);
-                      self.add_move(from, to, PAWN, NO_PIECE, BISHOP, new_en_passant_castling, false, false, &orig_position);
-                      self.add_move(from, to, PAWN, NO_PIECE, ROOK, new_en_passant_castling, false, false, &orig_position);
-                      self.add_move(from, to, PAWN, NO_PIECE, QUEEN, new_en_passant_castling, false, false, &orig_position);
-                  }
-                  else if !only_captures
-                  {
-                      self.add_move(from, to, PAWN, NO_PIECE, NO_PIECE, new_en_passant_castling, false, false, &orig_position);
-                      if BIT_AT_INDEX[from] & PAWN_HOME_RANK[us] != 0
-                      {
-                          let double_push_to = PAWN_QUIET_ATTACK_TABLE[us][to].trailing_zeros() as usize;
-                          if BIT_AT_INDEX[double_push_to] & occupancy == 0
-                          {
-                              self.add_move(
-                                  from,
-                                  double_push_to,
-                                  PAWN,
-                                  NO_PIECE,
-                                  NO_PIECE,
-                                  new_en_passant_castling | BIT_AT_INDEX[to],
-                                  false,
-                                  false,
-                                  &orig_position
-                              );
-                          }
-                      }
-                  }
-              }
-              let mut capture_attack_mask = PAWN_CAPTURE_ATTACK_TABLE[us][from] & orig_position.players[enemy];
-              if capture_attack_mask != 0
-              {
-                  loop
-                  {
-                      let to = find_and_clear_trailing_one(&mut capture_attack_mask);
-                      for i in 0..NO_PIECE
-                      {
-                          if (orig_position.pieces[i] & BIT_AT_INDEX[to]) != 0
-                          {
-                              if BIT_AT_INDEX[to] & HOME_RANK[enemy] != 0
-                              {
-                                  let n_new_en_passant_castling = new_en_passant_castling & !BIT_AT_INDEX[to];
-                                  self.add_move(from, to, PAWN, i as Piece, KNIGHT, n_new_en_passant_castling, false, false, &orig_position);
-                                  self.add_move(from, to, PAWN, i as Piece, BISHOP, n_new_en_passant_castling, false, false, &orig_position);
-                                  self.add_move(from, to, PAWN, i as Piece, ROOK, n_new_en_passant_castling, false, false, &orig_position);
-                                  self.add_move(from, to, PAWN, i as Piece, QUEEN, n_new_en_passant_castling, false, false, &orig_position);
-                              }
-                              else
-                              {
-                                  self.add_move(from, to, PAWN, i as Piece, NO_PIECE, new_en_passant_castling, false, false, &orig_position);
-                              }
-                              break;
-                          }
-                      }
-
-                      if capture_attack_mask == 0
-                      {
-                          break;
-                      }
-                  }
-              }
-              capture_attack_mask = PAWN_CAPTURE_ATTACK_TABLE[us][from] & orig_position.en_passant_castling & (RANKS[2] | RANKS[5]);
-              if capture_attack_mask != 0
-              {
-                  let to = capture_attack_mask.trailing_zeros() as usize;
-                  self.add_move(from, to, PAWN, PAWN, NO_PIECE, new_en_passant_castling, false, true, &orig_position);
-              }
-
-              if pawn_occupancy == 0
-              {
-                  break;
-              }
+            const size_t doublePushTo = trailingZeros(PAWN_QUIET_ATTACK_TABLE[us][to]);
+            if((BIT_AT_INDEX[doublePushTo] & occupancy) == 0)
+            {
+              this->addMove(
+                from,
+                doublePushTo,
+                PAWN,
+                NO_PIECE,
+                NO_PIECE,
+                newEnPassantCastling | BIT_AT_INDEX[to],
+                false,
+                false
+              );
+            }
           }
-      }*/
-  std::cout << "hi 1" << std::endl;
+        }
+      }
+
+      // capture moves
+      uint64_t captureAttackMask = PAWN_CAPTURE_ATTACK_TABLE[us][from] & origPosition.players[enemy];
+      if(captureAttackMask != 0)
+      {
+        while(captureAttackMask != 0)
+        {
+          const size_t to = findAndClearTrailingOne(captureAttackMask);
+          for(Piece captured = 0;  captured<NO_PIECE; captured++)
+          {
+            if((origPosition.pieces[captured] & BIT_AT_INDEX[to]) != 0)
+            {
+              if((BIT_AT_INDEX[to] & HOME_RANK[enemy]) != 0)
+              {
+                const uint64_t updatedNewEnPassantCastling = newEnPassantCastling & ~BIT_AT_INDEX[to];
+                this->addMove(from, to, PAWN, captured, KNIGHT, updatedNewEnPassantCastling, false, false);
+                this->addMove(from, to, PAWN, captured, BISHOP, updatedNewEnPassantCastling, false, false);
+                this->addMove(from, to, PAWN, captured, ROOK, updatedNewEnPassantCastling, false, false);
+                this->addMove(from, to, PAWN, captured, QUEEN, updatedNewEnPassantCastling, false, false);
+              }
+              else
+              {
+                this->addMove(from, to, PAWN, captured, NO_PIECE, newEnPassantCastling, false, false);
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      // en-passant
+      captureAttackMask = PAWN_CAPTURE_ATTACK_TABLE[us][from] & origPosition.enPassantCastling & (RANKS[2] | RANKS[5]);
+      if(captureAttackMask != 0)
+      {
+          const size_t to = trailingZeros(captureAttackMask);
+          this->addMove(from, to, PAWN, PAWN, NO_PIECE, newEnPassantCastling, false, true);
+      }
+    }
+  }
+}
+
+void MoveList::generateCastlingMoves(const Position& origPosition, uint64_t newEnPassantCastling)
+{
+  const Player enemy = origPosition.enemy;
+  const Player us = origPosition.us;
+
+  if((origPosition.enPassantCastling & CASTLING_KING_FROM[us]) != 0)
+  {
+    const uint64_t occupancy = origPosition.players[WHITE] | origPosition.players[BLACK];
+    // queenside castling
+    if(
+      origPosition.enPassantCastling & CASTLING_QUEENSIDE_ROOK_FROM[us] != 0 &&
+      CASTLING_QUEENSIDE_BLOCK_RELEVANT_AREA[us] & occupancy == 0 &&
+      not origPosition.inCheck(us, enemy, CASTLING_QUEENSIDE_CHECK_RELEVANT_FIELDS[us][0]) &&
+      not origPosition.inCheck(us, enemy, CASTLING_QUEENSIDE_CHECK_RELEVANT_FIELDS[us][1])
+    )
+    {
+      this->addMove(
+        CASTLING_KING_FROM_INDEX[us],
+        CASTLING_QUEENSIDE_KING_TO_INDEX[us],
+        KING,
+        NO_PIECE,
+        NO_PIECE,
+        newEnPassantCastling & ~(CASTLING_KING_FROM[us] | CASTLING_QUEENSIDE_ROOK_FROM[us]),
+        true,
+        false
+      );
+    }
+    // kingside castling
+    if(
+      origPosition.enPassantCastling & CASTLING_KINGSIDE_ROOK_FROM[us] != 0 &&
+      CASTLING_KINGSIDE_BLOCK_RELEVANT_AREA[us] & occupancy == 0 &&
+      not origPosition.inCheck(us, enemy, CASTLING_KINGSIDE_CHECK_RELEVANT_FIELDS[us][0]) &&
+      not origPosition.inCheck(us, enemy, CASTLING_KINGSIDE_CHECK_RELEVANT_FIELDS[us][1])
+    )
+    {
+      this->addMove(
+        CASTLING_KING_FROM_INDEX[us],
+        CASTLING_KINGSIDE_KING_TO_INDEX[us],
+        KING,
+        NO_PIECE,
+        NO_PIECE,
+        newEnPassantCastling & ~(CASTLING_KING_FROM[us] | CASTLING_KINGSIDE_ROOK_FROM[us]),
+        true,
+        false
+      );
+    }
+  }
 }

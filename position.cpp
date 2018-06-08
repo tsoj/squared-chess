@@ -1,16 +1,17 @@
 #include "position.hpp"
 #include "chessData.hpp"
+#include "countZeros.hpp"
 #include "move.hpp"
 
 #include <string>
 #include <sstream>
 
 using namespace ChessData;
+using namespace CountZeros;
 
 Position Position::emptyPosition()
 {
-  return
-  Position
+  return Position
   {
     {0,0,0,0,0,0},
     {0,0},
@@ -22,17 +23,17 @@ Position Position::emptyPosition()
     0
   };
 }
-void Position::addPiece(Player player, Piece piece, uint64_t to)
+void Position::addPiece(const Player player, const Piece piece, const uint64_t to)
 {
   this->pieces[piece] |= to;
   this->players[player] |= to;
 }
-void Position::removePiece(Player player, Piece piece, uint64_t from)
+void Position::removePiece(const Player player, const Piece piece, const uint64_t from)
 {
   this->pieces[piece] &=  !from;
   this->players[player] &=  !from;
 }
-void Position::movePiece(Player player, Piece piece, uint64_t from, uint64_t to)
+void Position::movePiece(const Player player, const Piece piece, const uint64_t from, const uint64_t to)
 {
   this->removePiece(player, piece, from);
   this->addPiece(player, piece, to);
@@ -75,7 +76,7 @@ uint64_t Position::calculateZobristkey()
       uint64_t tmpOccupancy = pieces[i];
       while(tmpOccupancy != 0)
       {
-        size_t squareIndex = ChessData::findAndClearTrailingOne(tmpOccupancy);
+        size_t squareIndex = CountZeros::findAndClearTrailingOne(tmpOccupancy);
         if((BIT_AT_INDEX[squareIndex] & players[WHITE]) != 0)
         {
           ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[WHITE][squareIndex];
@@ -121,7 +122,7 @@ uint64_t Position::getUpdatedZobristkey(const Move& m)
 
   if(m.capturedEnPassant)
   {
-    size_t capturedIndex = CountZeros::trailingZeros(PAWN_QUIET_ATTACK_TABLE[this->enemy][m.to]);
+    const size_t capturedIndex = CountZeros::trailingZeros(PAWN_QUIET_ATTACK_TABLE[this->enemy][m.to]);
     ret ^= ZOBRIST_RANDOM_BITMASKS_PIECES[PAWN][capturedIndex];
     ret ^= ZOBRIST_RANDOM_BITMASKS_PLAYERS[this->enemy][capturedIndex];
   }
@@ -147,7 +148,7 @@ uint64_t Position::getUpdatedZobristkey(const Move& m)
   }
   return ret;
 }
-bool Position::setFromFen(std::string fen)
+bool Position::setFromFen(const std::string fen)
 {
   *this = emptyPosition();
   std::stringstream buffer = std::stringstream(fen);
@@ -350,6 +351,47 @@ bool Position::setFromFen(std::string fen)
   }
   this->halfmoveClock = std::stoi(halfmoveClock);
   this->fullmovesPlayed = std::stoi(fullmoveNumber);
-  zobristKey = calculateZobristkey();
+  this->zobristKey = calculateZobristkey();
   return true;
+}
+bool Position::inCheck(Player us, Player enemy, size_t kingsIndex) const
+{
+    const uint64_t occupancy = this->players[WHITE] | this->players[BLACK];
+    // QUEEN
+    if((getAttackMask<QUEEN>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    // KNIGHT
+    if((getAttackMask<KNIGHT>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    // BISHOP
+    if((getAttackMask<BISHOP>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    // ROOK
+    if((getAttackMask<ROOK>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    // KING
+    if((getAttackMask<KING>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    //PAWN
+    if((PAWN_CAPTURE_ATTACK_TABLE[us][kingsIndex] & this->pieces[PAWN] & this->players[enemy]) != 0)
+    {
+        return true;
+    }
+    return false;
+}
+bool Position::inCheck(Player us, Player enemy) const
+{
+    const size_t kingsIndex = trailingZeros(this->pieces[KING] & this->players[us]);
+    ASSERT(kingsIndex<64);
+    return this->inCheck(us, enemy, kingsIndex);
 }

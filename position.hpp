@@ -20,14 +20,15 @@ struct Position
   int halfmoveClock;
 
   static Position emptyPosition();
-  void addPiece(Player player, Piece piece, uint64_t to);
-  void removePiece(Player player, Piece piece, uint64_t from);
-  void movePiece(Player player, Piece piece, uint64_t from, uint64_t to);
+  void addPiece(const Player player, const Piece piece, const uint64_t to);
+  void removePiece(const Player player, const Piece piece, const uint64_t from);
+  void movePiece(const Player player, const Piece piece, const uint64_t from, const uint64_t to);
   std::string getString();
   uint64_t calculateZobristkey();
   uint64_t getUpdatedZobristkey(const Move& m);
-  bool setFromFen(std::string fen);
-
+  bool setFromFen(const std::string fen);
+  bool inCheck(const Player us, const Player enemy, const size_t kingsIndex) const;
+  bool inCheck(const Player us, const Player enemy) const;
   /*pub fn generate_move_list(&self) -> MoveList
   {
         let mut move_list = MoveList::empty_move_list();
@@ -41,8 +42,9 @@ struct Position
         move_list.generate_piece_moves(&self, KING, get_attack_mask_king, new_en_passant_castling, false);
         move_list
     }
-  pub fn generate_capture_move_list(&self) -> MoveList
-  {
+
+    pub fn generate_capture_move_list(&self) -> MoveList
+    {
         let mut move_list = MoveList::empty_move_list();
         let new_en_passant_castling = self.en_passant_castling & (RANKS[0] | RANKS[7]);
         move_list.generate_pawn_moves(&self, new_en_passant_castling, true);
@@ -52,50 +54,6 @@ struct Position
         move_list.generate_piece_moves(&self, QUEEN, get_attack_mask_queen, new_en_passant_castling, true);
         move_list.generate_piece_moves(&self, KING, get_attack_mask_king, new_en_passant_castling, true);
         move_list
-    }
-  pub fn is_check(&self, us: Player, enemy: Player, kings_index: usize) -> bool
-  {
-        let occupancy = self.players[WHITE] | self.players[BLACK];
-        //QUEEN
-        if get_attack_mask_queen(kings_index, occupancy) & self.pieces[QUEEN] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        //KNIGHT
-        if get_attack_mask_knight(kings_index, occupancy) & self.pieces[KNIGHT] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        //BISHOP
-        if get_attack_mask_bishop(kings_index, occupancy) & self.pieces[BISHOP] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        //ROOK
-        if get_attack_mask_rook(kings_index, occupancy) & self.pieces[ROOK] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        //KING
-        if get_attack_mask_king(kings_index, occupancy) & self.pieces[KING] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        //PAWN
-        if PAWN_CAPTURE_ATTACK_TABLE[us][kings_index] & self.pieces[PAWN] & self.players[enemy] != 0
-        {
-            return true;
-        }
-        false
-    }
-  pub fn is_check_unkown_kings_index(&self, us: Player, enemy: Player) -> bool
-  {
-        let kings_index = (self.pieces[KING] & self.players[us]).trailing_zeros() as usize;
-        if kings_index == 64
-        {
-            return true;
-        }
-        self.is_check(us, enemy, kings_index)
     }
   pub fn make_move(&mut self, m: &Move)
   {

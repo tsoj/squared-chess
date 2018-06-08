@@ -95,48 +95,48 @@ namespace ChessData
   ;
 
 
-  inline size_t getHashkeyRank(size_t index, uint64_t occupancy)
+  inline size_t getHashkeyRank(const size_t index, const uint64_t occupancy)
   {
     return ((occupancy >> ((index / 8)*8)) >> 1) & 0b111111U;
   }
-  inline size_t getHashkeyFile(size_t index, uint64_t occupancy)
+  inline size_t getHashkeyFile(const size_t index, const uint64_t occupancy)
   {
     return (((((occupancy >> (index % 8)) & FILES[0] )*MAIN_DIAGONAL) >> 56) >> 1) & 0b111111U;
   }
-  inline size_t getHashkeyDiagonal(size_t index, uint64_t occupancy)
+  inline size_t getHashkeyDiagonal(const size_t index, const uint64_t occupancy)
   {
     return ((((occupancy & DIAGONALS_64[index])*FILES[0]) >> 56) >> 1) & 0b111111U;
   }
-  inline size_t getHashkeyAntiDiagonal(size_t index, uint64_t occupancy)
+  inline size_t getHashkeyAntiDiagonal(const size_t index, const uint64_t occupancy)
   {
     return ((((occupancy & ANTI_DIAGONALS_64[index])*FILES[0]) >> 56) >> 1) & 0b111111U;
   }
 
   template<Piece p>
-  inline uint64_t getAttackMask(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask(const size_t index, const uint64_t occupancy)
   {
     ASSERT(false);
     return 0;
   }
   template<>
-  inline uint64_t getAttackMask<KNIGHT>(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask<KNIGHT>(const size_t index, const uint64_t occupancy)
   {
     return KNIGHT_ATTACK_TABLE[index];
   }
   template<>
-  inline uint64_t getAttackMask<BISHOP>(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask<BISHOP>(const size_t index, const uint64_t occupancy)
   {
     return ANTI_DIAGONAL_ATTACK_TABLE[index][getHashkeyAntiDiagonal(index, occupancy)] |
     DIAGONAL_ATTACK_TABLE[index][getHashkeyDiagonal(index, occupancy)];
   }
   template<>
-  inline uint64_t getAttackMask<ROOK>(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask<ROOK>(const size_t index, const uint64_t occupancy)
   {
     return RANK_ATTACK_TABLE[index][getHashkeyRank(index, occupancy)] |
     FILE_ATTACK_TABLE[index][getHashkeyFile(index, occupancy)];
   }
   template<>
-  inline uint64_t getAttackMask<QUEEN>(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask<QUEEN>(const size_t index, const uint64_t occupancy)
   {
     return ANTI_DIAGONAL_ATTACK_TABLE[index][getHashkeyAntiDiagonal(index, occupancy)] |
     DIAGONAL_ATTACK_TABLE[index][getHashkeyDiagonal(index, occupancy)] |
@@ -144,19 +144,12 @@ namespace ChessData
     FILE_ATTACK_TABLE[index][getHashkeyFile(index, occupancy)];
   }
   template<>
-  inline uint64_t getAttackMask<KING>(size_t index, uint64_t occupancy)
+  inline uint64_t getAttackMask<KING>(const size_t index, const uint64_t occupancy)
   {
     return KING_ATTACK_TABLE[index];
   }
 
-  inline size_t findAndClearTrailingOne(uint64_t & mask)
-  {
-    size_t ret = CountZeros::trailingZeros(mask);
-    mask &= mask -1;
-    return ret;
-  }
-
-  inline std::string getBitboardString(uint64_t a)
+  inline std::string getBitboardString(const uint64_t a)
   {
     std::string ret = "";
     for(size_t rank = 7; rank<8; rank--)
@@ -177,7 +170,7 @@ namespace ChessData
     return ret;
   }
 
-  inline std::string getSquareNotation(size_t i)
+  inline std::string getSquareNotation(const size_t i)
   {
     switch(i)
     {
@@ -249,7 +242,7 @@ namespace ChessData
     }
   }
 
-  inline size_t getSquareIndex(std::string s)
+  inline size_t getSquareIndex(const std::string s)
   {
     if(s == "a1" | s == "A1"){ return  0; }
     if(s == "b1" | s == "B1"){ return  1; }
