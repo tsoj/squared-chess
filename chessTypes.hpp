@@ -77,7 +77,7 @@ namespace ChessTypes
     return "?";
   }
 
-  inline std::string getNotation(const Player player, const Piece piece)
+  inline std::string getPieceNotation(const Player player, const Piece piece)
   {
     if(player == BLACK)
     {
@@ -114,7 +114,7 @@ namespace ChessTypes
     return "?";
   }
 
-  inline std::tuple<Player, Piece> get_piece(const std::string s)
+  inline std::tuple<Player, Piece> getPiece(const std::string s)
   {
     if(s=="p")
     {
@@ -167,4 +167,5 @@ namespace ChessTypes
     }
     return std::tuple<Player, Piece>(NO_PLAYER, NO_PIECE);
   }
+
 }

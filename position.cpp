@@ -2,6 +2,7 @@
 #include "chessData.hpp"
 #include "countZeros.hpp"
 #include "move.hpp"
+#include "moveList.hpp"
 
 #include <string>
 #include <sstream>
@@ -30,8 +31,8 @@ void Position::addPiece(const Player player, const Piece piece, const uint64_t t
 }
 void Position::removePiece(const Player player, const Piece piece, const uint64_t from)
 {
-  this->pieces[piece] &=  !from;
-  this->players[player] &=  !from;
+  this->pieces[piece] &=  ~from;
+  this->players[player] &=  ~from;
 }
 void Position::movePiece(const Player player, const Piece piece, const uint64_t from, const uint64_t to)
 {
@@ -64,6 +65,37 @@ std::string Position::getString() const
     }
     ret+="|\n";
   }
+  return ret;
+}
+std::string Position::getDataString() const
+{
+  std::string ret = "";
+  ret += "\nWHOSE MOVE: ";
+  ret += std::to_string(us);
+  ret += "\nFULLMOVES PLAYED: ";
+  ret += std::to_string(fullmovesPlayed);
+  ret += "\nHALFMOVE CLOCK: ";
+  ret += std::to_string(halfmoveClock);
+  ret += "\nZOBRIST KEY: ";
+  ret += std::to_string(zobristKey);
+  ret += "\nCASTLING / EN PASSANT\n";
+  ret += getBitboardString(enPassantCastling);
+  ret += "WHITE:\n";
+  ret += getBitboardString(players[WHITE]);
+  ret += "BLACK:\n";
+  ret += getBitboardString(players[BLACK]);
+  ret += "PAWNS:\n";
+  ret += getBitboardString(pieces[PAWN]);
+  ret += "KNIGHTS:\n";
+  ret += getBitboardString(pieces[KNIGHT]);
+  ret += "BISHOPS:\n";
+  ret += getBitboardString(pieces[BISHOP]);
+  ret += "ROOKS:\n";
+  ret += getBitboardString(pieces[ROOK]);
+  ret += "QUEENS:\n";
+  ret += getBitboardString(pieces[QUEEN]);
+  ret += "KINGS:\n";
+  ret += getBitboardString(pieces[KING]);
   return ret;
 }
 uint64_t Position::calculateZobristKey() const
@@ -356,38 +388,38 @@ bool Position::setFromFen(const std::string fen)
 }
 bool Position::inCheck(Player us, Player enemy, size_t kingsIndex) const
 {
-    const uint64_t occupancy = this->players[WHITE] | this->players[BLACK];
-    // QUEEN
-    if((getAttackMask<QUEEN>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    // KNIGHT
-    if((getAttackMask<KNIGHT>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    // BISHOP
-    if((getAttackMask<BISHOP>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    // ROOK
-    if((getAttackMask<ROOK>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    // KING
-    if((getAttackMask<KING>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    //PAWN
-    if((PAWN_CAPTURE_ATTACK_TABLE[us][kingsIndex] & this->pieces[PAWN] & this->players[enemy]) != 0)
-    {
-        return true;
-    }
-    return false;
+  const uint64_t occupancy = this->players[WHITE] | this->players[BLACK];
+  // QUEEN
+  if((getAttackMask<QUEEN>(kingsIndex, occupancy) & this->pieces[QUEEN] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  // KNIGHT
+  if((getAttackMask<KNIGHT>(kingsIndex, occupancy) & this->pieces[KNIGHT] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  // BISHOP
+  if((getAttackMask<BISHOP>(kingsIndex, occupancy) & this->pieces[BISHOP] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  // ROOK
+  if((getAttackMask<ROOK>(kingsIndex, occupancy) & this->pieces[ROOK] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  // KING
+  if((getAttackMask<KING>(kingsIndex, occupancy) & this->pieces[KING] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  //PAWN
+  if((PAWN_CAPTURE_ATTACK_TABLE[us][kingsIndex] & this->pieces[PAWN] & this->players[enemy]) != 0)
+  {
+    return true;
+  }
+  return false;
 }
 bool Position::inCheck(Player us, Player enemy) const
 {
@@ -475,8 +507,25 @@ void Position::makeMove(Move m)
   {
     this->fullmovesPlayed += 1;
   }
-  const Player tmp = this->us;
-  this->us = this->enemy;
-  this->enemy = tmp;
+  this->us = enemy;
+  this->enemy = us;
   this->zobristKey = m.zobristKey;
+}
+std::string Position::getAllPseudoLegalMovesString() const
+{
+  std::string ret = "";
+  const MoveList moveList = this->generateMoveList();
+  for(size_t i = 0; i!=moveList.size(); ++i)
+  {
+    Position p = (*this);
+    p.makeMove(moveList[i]);
+    ret += "------------------------------------------------\n";
+    ret += moveList[i].getNotation()+":\n";
+    ret += p.getString();
+    ret += "\n";
+    //ret += p.getDataString();
+  }
+  ret += std::to_string(moveList.size());
+  ret += " pseudo-legal moves.\n";
+  return ret;
 }

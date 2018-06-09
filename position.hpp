@@ -25,6 +25,7 @@ struct Position
   void removePiece(const Player player, const Piece piece, const uint64_t from);
   void movePiece(const Player player, const Piece piece, const uint64_t from, const uint64_t to);
   std::string getString() const;
+  std::string getDataString() const;
   uint64_t calculateZobristKey() const;
   uint64_t getUpdatedZobristKey(const Move& m) const;
   bool setFromFen(const std::string fen);
@@ -33,23 +34,5 @@ struct Position
   MoveList generateMoveList() const;
   MoveList generateCaptureMoveList() const;
   void makeMove(Move m);
-  /*pub fn get_all_pseudo_legal_mov_string(&mut self) -> String
-  {
-        let mut ret = "".to_string();
-        let ml = self.generate_move_list();
-        for i in 0..ml.len
-        {
-            let mut next_p = self.clone();
-            next_p.make_move(&ml[i]);
-            ret += "------------------------------------------------\n";
-            ret += &next_p.get_chess_board_string()[..];
-            ret += "\n";
-            ret += &next_p.get_fen_string()[..];
-            ret += "\n";
-        }
-        ret+= &ml.len.to_string()[..];
-        ret += " pseudo-legal mov.\n";
-        ret
-    }
-  */
+  std::string getAllPseudoLegalMovesString() const;
 };

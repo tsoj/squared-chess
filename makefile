@@ -4,7 +4,7 @@ LDFLAGS = -std=c++17 -O3
 NAME = ^2-chess
 BIN_FILE_PATH = ./bin/
 
-CPP = main.cpp position.cpp move.cpp
+CPP = main.cpp position.cpp moveList.cpp
 OBJ = $(CPP:%.cpp=%.o)
 OBJ_DEST = $(CPP:%.cpp=$(BIN_FILE_PATH)%.o)
 

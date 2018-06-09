@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <bitset>
 
 #define NORTH 8
 #define SOUTH -8
@@ -39,27 +40,33 @@ size_t getHashkeyDiagonal(size_t index, uint64_t occupancy, uint64_t files[8], u
 }
 size_t getHashkeyAntiDiagonal(size_t index, uint64_t occupancy, uint64_t files[8], uint64_t antiDiagonals64[64])
 {
-    return ((((occupancy & antiDiagonals64[index])*files[0]) >> 56) >> 1) & 0b111111U;
+  return ((((occupancy & antiDiagonals64[index])*files[0]) >> 56) >> 1) & 0b111111U;
 }
 
+inline std::string getBitboardString(const uint64_t a)
+{
+  std::string ret = "";
+  for(size_t rank = 7; rank<8; rank--)
+  {
+    for(size_t file = 0; file<8; file++)
+    {
+      if(((uint64_t)(0b1) << (8*rank + file) & a) != 0)
+      {
+        ret+="1";
+      }
+      else
+      {
+        ret+="0";
+      }
+    }
+    ret+="\n";
+  }
+  return ret;
+}
 void printBitboard(uint64_t b)
 {
-  for(int i = 0; i<64; i++)
-  {
-    if(i%8==0)
-    {
-      std::cout << std::endl;
-    }
-    if((((uint64_t)(0b1) << i) & b) != 0)
-    {
-      std::cout << "1";
-    }
-    else
-    {
-      std::cout << "0";
-    }
-  }
-  std::cout << std::endl;
+
+  std::cout << getBitboardString(b) <<  std::endl;
 }
 
 void stringToFile(std::string path, std::string s)
@@ -78,7 +85,7 @@ std::string arrayToString(uint64_t a[size])
     ret.append("U");
     if(i<size-1)
     {
-      ret.append(", ");
+      ret.append(",");
     }
     else
     {
@@ -96,7 +103,7 @@ std::string arrayOfArrayToString(uint64_t a[size1][size2])
     ret.append(arrayToString<size2>(a[i]));
     if(i<size1-1)
     {
-      ret.append(", ");
+      ret.append(",");
     }
     else
     {
@@ -114,7 +121,7 @@ std::string arrayOfArrayOfArrayToString(uint64_t a[size1][size2][size3])
     ret.append(arrayOfArrayToString(a[i]));
     if(i<size1-1)
     {
-      ret.append(", ");
+      ret.append(",");
     }
     else
     {
@@ -123,6 +130,10 @@ std::string arrayOfArrayOfArrayToString(uint64_t a[size1][size2][size3])
   }
   return ret;
 }
+
+uint64_t testOccupancy =
+  0b0000000000000000000000000001100000010000001001011111111010010001U |
+  0b1001000101111101011100110000000000000010100000000000000000000000U;
 
 int main()
 {
@@ -289,13 +300,15 @@ int main()
         }
         else
         {
-          tmpAttackMask |= bitAtIndex[index];
+          tmpAttackMask |= bitAtIndex[i];
         }
       }
       antiDiagonalAttackTable[index][getHashkeyAntiDiagonal(index, occupancy, files, antiDiagonals64)] = tmpAttackMask;
     }
   }
   stringToFile("./chessData/antiDiagonalAttackTable.in", arrayOfArrayToString<64, 64>(antiDiagonalAttackTable));
+
+  uint64_t t = 0;
 
   uint64_t diagonalAttackTable[64][64] = {0};
   for(size_t index = 0; index<64; index++)
@@ -330,6 +343,7 @@ int main()
       while(true)
       {
         i += SOUTH_WEST;
+
         if(i>=64/*equals i < 0*/)
         {
           break;
@@ -345,7 +359,7 @@ int main()
         }
         else
         {
-          tmpAttackMask |= bitAtIndex[index];
+          tmpAttackMask |= bitAtIndex[i];
         }
       }
       diagonalAttackTable[index][getHashkeyDiagonal(index, occupancy, files, diagonals64)] = tmpAttackMask;
@@ -393,7 +407,7 @@ int main()
         }
         else
         {
-          tmpAttackMask |= bitAtIndex[index];
+          tmpAttackMask |= bitAtIndex[i];
         }
       }
       fileAttackTable[index][getHashkeyFile(index, occupancy, files)] = tmpAttackMask;
@@ -449,7 +463,7 @@ int main()
         }
         else
         {
-          tmpAttackMask |= bitAtIndex[index];
+          tmpAttackMask |= bitAtIndex[i];
         }
       }
       rankAttackTable[index][getHashkeyRank(index, occupancy)] = tmpAttackMask;
@@ -461,7 +475,7 @@ int main()
   for(size_t i = 0; i<64; i++)
   {
     knightAttackTable[i] = 0;
-    if(i+NORTH+NORTH_EAST < 64 && i % 8 != 0)
+    if(i+NORTH+NORTH_WEST < 64 && i % 8 != 0)
     {
       knightAttackTable[i] |= bitAtIndex[i + NORTH + NORTH_WEST];
     }
@@ -599,12 +613,12 @@ int main()
     //WHITE
     for(size_t j = 0; j<(i/8)+1; j++)
     {
-      isPassed[0][i] &= !ranks[j];
+      isPassed[0][i] &= ~ranks[j];
     }
     //BLACK
     for(size_t j = (i/8); j<8; j++)
     {
-      isPassed[1][i] &= !ranks[j];
+      isPassed[1][i] &= ~ranks[j];
     }
   }
   stringToFile("./chessData/isPassed.in", arrayOfArrayToString<2, 64>(isPassed));

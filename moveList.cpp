@@ -1,7 +1,4 @@
-#include "move.hpp"
-
-std::vector<Move> MoveList::movePool = std::vector<Move>();
-std::vector<size_t> MoveList::freeOffsets = {0};
+#include "moveList.hpp"
 
 template<>
 void MoveList::generateMoves<PAWN>(const Position& origPosition, const uint64_t newEnPassantCastling, const bool onlyCaptures)
@@ -101,8 +98,8 @@ void MoveList::generateCastlingMoves(const Position& origPosition, uint64_t newE
     const uint64_t occupancy = origPosition.players[WHITE] | origPosition.players[BLACK];
     // queenside castling
     if(
-      origPosition.enPassantCastling & CASTLING_QUEENSIDE_ROOK_FROM[us] != 0 &&
-      CASTLING_QUEENSIDE_BLOCK_RELEVANT_AREA[us] & occupancy == 0 &&
+      (origPosition.enPassantCastling & CASTLING_QUEENSIDE_ROOK_FROM[us]) != 0 &&
+      (CASTLING_QUEENSIDE_BLOCK_RELEVANT_AREA[us] & occupancy) == 0 &&
       not origPosition.inCheck(us, enemy, CASTLING_QUEENSIDE_CHECK_RELEVANT_FIELDS[us][0]) &&
       not origPosition.inCheck(us, enemy, CASTLING_QUEENSIDE_CHECK_RELEVANT_FIELDS[us][1])
     )
@@ -121,8 +118,8 @@ void MoveList::generateCastlingMoves(const Position& origPosition, uint64_t newE
     }
     // kingside castling
     if(
-      origPosition.enPassantCastling & CASTLING_KINGSIDE_ROOK_FROM[us] != 0 &&
-      CASTLING_KINGSIDE_BLOCK_RELEVANT_AREA[us] & occupancy == 0 &&
+      (origPosition.enPassantCastling & CASTLING_KINGSIDE_ROOK_FROM[us]) != 0 &&
+      (CASTLING_KINGSIDE_BLOCK_RELEVANT_AREA[us] & occupancy) == 0 &&
       not origPosition.inCheck(us, enemy, CASTLING_KINGSIDE_CHECK_RELEVANT_FIELDS[us][0]) &&
       not origPosition.inCheck(us, enemy, CASTLING_KINGSIDE_CHECK_RELEVANT_FIELDS[us][1])
     )
